@@ -2,5 +2,7 @@ services:
   - type: web
     name: don-onofre-adamspay
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate --noinput
     startCommand: gunicorn dononofre.wsgi
