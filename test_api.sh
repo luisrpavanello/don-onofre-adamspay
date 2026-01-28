@@ -34,3 +34,5 @@ PYEOF
 
 echo ''
 echo '=== TESTES CONCLUÍDOS ==='
+
+chmod +x test_api.sh

@@ -30,3 +30,4 @@ echo ''
 
 python manage.py runserver 8001
 
+chmod +x run.sh

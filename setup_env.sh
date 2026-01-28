@@ -50,3 +50,4 @@ echo '  ./test_api.sh      - Testar API'
 echo '  ./deploy.sh        - Fazer deploy no Render'
 echo ''
 
+chmod +x setup_env.sh
