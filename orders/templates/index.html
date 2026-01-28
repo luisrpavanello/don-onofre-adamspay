@@ -1,0 +1,18 @@
+<h1>DON ONOFRE</h1>
+
+<button onclick="pay()">Comprar Pizza – $50</button>
+
+<script>
+function pay() {
+  fetch('/api/orders/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      product_name: 'Pizza Don Onofre',
+      amount: 50
+    })
+  })
+  .then(r => r.json())
+  .then(data => window.location.href = data.payment_link)
+}
+</script>
