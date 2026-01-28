@@ -1,18 +1,126 @@
-<h1>DON ONOFRE</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Don Onofre - Sistema de Pagamentos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>🛒 Don Onofre - Sistema de Pagamentos</h1>
+    
+    <h2>Produtos Disponíveis:</h2>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
+            <h3>🍕 Pizza Don Onofre</h3>
+            <p>Deliciosa pizza artesanal</p>
+            <p><strong>R$ 50,00</strong></p>
+            <button onclick="buyProduct('Pizza Don Onofre', 50)" 
+                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Comprar
+            </button>
+        </div>
+        
+        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
+            <h3>🍔 Hambúrguer Artesanal</h3>
+            <p>Hambúrguer com ingredientes premium</p>
+            <p><strong>R$ 35,00</strong></p>
+            <button onclick="buyProduct('Hambúrguer Artesanal', 35)"
+                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Comprar
+            </button>
+        </div>
+        
+        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
+            <h3>🥤 Refrigerante</h3>
+            <p>Refrigerante 500ml</p>
+            <p><strong>R$ 8,00</strong></p>
+            <button onclick="buyProduct('Refrigerante', 8)"
+                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Comprar
+            </button>
+        </div>
+    </div>
+    
+    <div id="result" style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 10px; display: none; background: #f9f9f9;">
+        <h3>Status do Pedido:</h3>
+        <p id="status">Processando...</p>
+        <a id="payment-link" href="#" target="_blank" 
+           style="display: none; background: #2196F3; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+            Ir para Pagamento
+        </a>
+    </div>
 
-<button onclick="pay()">Comprar Pizza – $50</button>
-
-<script>
-function pay() {
-  fetch('/api/orders/', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      product_name: 'Pizza Don Onofre',
-      amount: 50
-    })
-  })
-  .then(r => r.json())
-  .then(data => window.location.href = data.payment_link)
-}
-</script>
+    <script>
+    function buyProduct(productName, amount) {
+        const resultDiv = document.getElementById('result');
+        const statusP = document.getElementById('status');
+        const paymentLink = document.getElementById('payment-link');
+        
+        resultDiv.style.display = 'block';
+        statusP.textContent = 'Criando pedido...';
+        paymentLink.style.display = 'none';
+        
+        fetch('/api/orders/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_name: productName,
+                amount: amount
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na requisição: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Pedido criado:', data);
+            statusP.textContent = `Pedido criado com sucesso! ID: ${data.id}`;
+            
+            if (data.payment_link) {
+                paymentLink.href = data.payment_link;
+                paymentLink.textContent = 'Clique aqui para pagar';
+                paymentLink.style.display = 'inline-block';
+                
+                // Redireciona automaticamente após 3 segundos
+                setTimeout(() => {
+                    window.location.href = data.payment_link;
+                }, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            statusP.textContent = 'Erro ao criar pedido: ' + error.message;
+            statusP.style.color = 'red';
+        });
+    }
+    </script>
+    
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+    }
+    h1 {
+        color: #333;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 10px;
+    }
+    button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        transition: all 0.3s;
+    }
+    #result {
+        max-width: 500px;
+    }
+    </style>
+</body>
+</html>

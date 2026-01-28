@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import create_order, adams_callback
+from . import views
 
 urlpatterns = [
-    path('orders/', create_order),
-    path('adams/callback/', adams_callback),
+    path('', views.home, name='home'),
+    path('orders/', views.create_order, name='create_order'),
+    path('adams/callback/', views.adams_callback, name='adams_callback'),
 ]
