@@ -245,3 +245,54 @@ def order_status(request, order_id):
         })
     except Order.DoesNotExist:
         return Response({'error': 'Pedido não encontrado'}, status=404)
+    
+@api_view(['GET'])
+def test_webhook(request, order_id):
+    """Testar manualmente o webhook (para desenvolvimento)"""
+    try:
+        order = Order.objects.get(id=order_id)
+        
+        # Simular dados que a AdamsPay enviaria
+        test_data = {
+            "externalId": str(order.id),
+            "status": "paid",
+            "debt": {
+                "docId": str(order.id),
+                "amount": {
+                    "currency": "PYG",
+                    "value": str(int(float(order.amount) * 1000))
+                },
+                "label": order.product_name,
+                "payStatus": {
+                    "status": "paid",
+                    "time": datetime.now().isoformat() + "Z"
+                }
+            }
+        }
+        
+        # Chamar o webhook internamente
+        from django.test import RequestFactory
+        factory = RequestFactory()
+        webhook_request = factory.post(
+            '/api/adams/callback/',
+            data=test_data,
+            content_type='application/json'
+        )
+        
+        # Processar como se fosse da AdamsPay
+        response = adams_callback(webhook_request)
+        
+        # Recarregar order para ver mudanças
+        order.refresh_from_db()
+        
+        return Response({
+            'test': 'Webhook simulado',
+            'order_id': str(order.id),
+            'old_status': 'PENDING',
+            'new_status': order.status,
+            'webhook_response': response.data,
+            'payment_link': order.payment_link
+        })
+        
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
