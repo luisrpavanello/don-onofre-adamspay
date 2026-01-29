@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret-key')
 
 # SECURITY WARNING:
-DEBUG = True  
+DEBUG = os.getenv('DEBUG', 'False') == 'True'  
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True 
@@ -35,12 +35,9 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
 ]
 
-
 ALLOWED_HOSTS = ['don-onofre-adamspay.onrender.com', 'localhost', '127.0.0.1']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,36 +81,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dononofre.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
-}
+# Configuração do banco de dados - priorizando PostgreSQL do Render
+DATABASE_URL = os.getenv('DATABASE_URL', None)
 
-if os.environ.get('RENDER', False):
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-
-RENDER = os.environ.get('RENDER', False)
-
-# Database configuration
-if RENDER:
-    # No Render, usar migrações automáticas
+if DATABASE_URL:
+    # Usar PostgreSQL do Render
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'render_db.sqlite3'),
-        }
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
-    # Localmente
+    # Localmente - usar SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -122,8 +106,6 @@ else:
     }
 
 # Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -139,22 +121,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
