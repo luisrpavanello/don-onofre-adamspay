@@ -1,53 +1,53 @@
 #!/bin/bash
-# Configuração completa do ambiente Don Onofre
+# Configuración completa del entorno Don Onofre
 
-echo '=== CONFIGURANDO AMBIENTE DON ONOFRE ==='
+echo 'Configuración completa del entorno Don Onofre'
 
-# 1. Verificar se estamos na pasta correta
+# 1. Verificar si estamos en la carpeta correcta
 PROJECT_DIR="/home/luisrpavanello/LRP/don-onofre-adamspay"
 if [ "$(pwd)" != "$PROJECT_DIR" ]; then
-    echo "ERRO: Execute este script da pasta do projeto: $PROJECT_DIR"
-    echo "Você está em: $(pwd)"
+    echo "ERROR: Ejecute este script desde la carpeta del proyecto: $PROJECT_DIR"
+    echo "Usted está en: $(pwd)"
     exit 1
 fi
 
-# 2. Ativar ambiente virtual
+# 2. Activar entorno virtual
 if [ ! -d "venv_dononofre" ]; then
-    echo "Criando ambiente virtual..."
+    echo "Creando entorno virtual..."
     python3 -m venv venv_dononofre
 fi
 
 source venv_dononofre/bin/activate
-echo "✓ Ambiente virtual ativado: $(which python)"
+echo "✓ Entorno virtual activado: $(which python)"
 
-# 3. Instalar/atualizar dependências
-echo "Instalando dependências..."
+# 3. Instalar/actualizar dependencias
+echo "Instalando dependencias..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 4. Configurar variáveis de ambiente
+# 4. Configurar variables de entorno
 export DJANGO_SETTINGS_MODULE="dononofre.settings"
 export DJANGO_SECRET_KEY="dononofre-dev-secret-xyz-789"
 export PYTHONPATH="/home/luisrpavanello/LRP/don-onofre-adamspay:$PYTHONPATH"
 
-echo "✓ Variáveis configuradas:"
+echo "✓ Variables configuradas:"
 echo "  - DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
 echo "  - PYTHONPATH configurado"
 
-# 5. Verificar banco de dados
+# 5. Verificar base de datos
 if [ ! -f "db.sqlite3" ]; then
-    echo "Criando banco de dados..."
+    echo "Creando base de datos..."
     python manage.py makemigrations
     python manage.py migrate
-    echo "✓ Banco de dados criado"
+    echo "Base de datos creada"
 fi
 
 echo ''
-echo '=== AMBIENTE CONFIGURADO COM SUCESSO ==='
-echo 'Comandos disponíveis:'
+echo '=== ENTORNO CONFIGURADO EXITOSAMENTE ==='
+echo 'Comandos disponibles:'
 echo '  ./run.sh           - Iniciar servidor'
-echo '  ./test_api.sh      - Testar API'
-echo '  ./deploy.sh        - Fazer deploy no Render'
+echo '  ./test_api.sh      - Probar API'
+echo '  ./deploy.sh        - Hacer deploy en Render'
 echo ''
 
 chmod +x setup_env.sh

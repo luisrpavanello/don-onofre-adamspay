@@ -1,169 +1,1140 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Don Onofre - Sistema de Pagamentos</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don Onofre - Mercado & Delicatessen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8B4513; /* Marrón para mercado */
+            --secondary: #228B22; /* Verde para fresco/natural */
+            --accent: #D2691E; /* Naranja para ofertas */
+            --success: #2E8B57; /* Verde mar para éxito */
+            --light: #FFF8DC; /* Beige claro */
+            --dark: #654321; /* Marrón oscuro */
+            --gray: #A9A9A9;
+            --shadow: 0 10px 30px rgba(139, 69, 19, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=1200');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(139, 69, 19, 0.8);
+        }
+
+        .header > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--light);
+        }
+
+        .title {
+            font-size: 2.8rem;
+            color: white;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-family: 'Georgia', serif;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light);
+            max-width: 600px;
+            margin: 0 auto;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Navigation */
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 12px 25px;
+            border: 2px solid var(--secondary);
+            background: white;
+            color: var(--secondary);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn.active,
+        .category-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Products Section */
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent);
+            display: inline-block;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid #E6D5B8;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.15);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .product-badge.organic { background: var(--secondary); }
+        .product-badge.new { background: #3498db; }
+        .product-badge.limited { background: #9B59B6; }
+
+        .product-image {
+            height: 200px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+        }
+
+        .product-content {
+            padding: 25px;
+        }
+
+        .product-name {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .product-description {
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            min-height: 60px;
+        }
+
+        .product-features {
+            margin: 15px 0;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: var(--dark);
+        }
+
+        .feature i {
+            color: var(--success);
+            width: 16px;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .product-price .old-price {
+            font-size: 1rem;
+            color: var(--gray);
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+
+        .buy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .buy-btn:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* Order Result */
+        .order-result {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-top: 40px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+            border: 2px solid var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .order-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .order-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .order-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .order-status {
+            background: #FFF8DC;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .status-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .order-id {
+            font-size: 0.9rem;
+            color: var(--gray);
+            background: #F5E6D3;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .payment-link {
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .payment-link:hover {
+            background: #1E6B47;
+            transform: translateY(-3px);
+        }
+
+        .status-btn {
+            background: var(--accent);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .status-btn:hover {
+            background: #B85C14;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            color: var(--dark);
+            font-size: 0.9rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .store-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .payment-link, .status-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .categories {
+                gap: 8px;
+            }
+            
+            .category-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Special offer banner */
+        .offer-banner {
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        .cart-summary {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .cart-summary:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-    <h1>🛒 Don Onofre - Sistema de Pagamentos</h1>
-    
-    <h2>Produtos Disponíveis:</h2>
-    
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
-            <h3>🍕 Pizza Don Onofre</h3>
-            <p>Deliciosa pizza artesanal</p>
-            <p><strong>R$ 50,00</strong></p>
-            <button onclick="buyProduct('Pizza Don Onofre', 50)" 
-                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                Comprar
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h1 class="title">Mercado Don Onofre</h1>
+            </div>
+            <p class="subtitle">Delicatessen, productos gourmet y alimentos</p>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px;">
+                    <i class="fas fa-truck"></i> Envío gratis desde ₲ 100.000
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px;">
+                    <i class="fas fa-leaf"></i> Productos orgánicos
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px;">
+                    <i class="fas fa-shield-alt"></i> Pago seguro con AdamsPay
+                </span>
+            </div>
+        </header>
+
+        <!-- Offer Banner -->
+        <div class="offer-banner">
+            <i class="fas fa-gift"></i> ¡OFERTA ESPECIAL! 15% de descuento en tu primera compra usando el código: DONONOFRE15
+        </div>
+
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-btn active" onclick="filterProducts('all')">
+                <i class="fas fa-store"></i> Todos los productos
+            </button>
+            <button class="category-btn" onclick="filterProducts('gourmet')">
+                <i class="fas fa-utensils"></i> Gourmet
+            </button>
+            <button class="category-btn" onclick="filterProducts('organic')">
+                <i class="fas fa-leaf"></i> Orgánicos
+            </button>
+            <button class="category-btn" onclick="filterProducts('drinks')">
+                <i class="fas fa-wine-bottle"></i> Bebidas
+            </button>
+            <button class="category-btn" onclick="filterProducts('bakery')">
+                <i class="fas fa-bread-slice"></i> Panadería
             </button>
         </div>
-        
-        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
-            <h3>🍔 Hambúrguer Artesanal</h3>
-            <p>Hambúrguer com ingredientes premium</p>
-            <p><strong>R$ 35,00</strong></p>
-            <button onclick="buyProduct('Hambúrguer Artesanal', 35)"
-                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                Comprar
-            </button>
+
+        <!-- Products Section -->
+        <section class="products">
+            <h2 class="section-title">Nuestros Productos Destacados</h2>
+            <div class="products-grid" id="products-container">
+                <!-- Product 1: Jamón Ibérico -->
+                <div class="product-card" data-category="gourmet">
+                    <div class="product-badge">GOURMET</div>
+                    <div class="product-image">
+                        <i class="fas fa-drumstick-bite"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Jamón Ibérico de Bellota</h3>
+                        <p class="product-description">Jamón 100% ibérico de bellota, curación 36 meses. Producto premium importado de España.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Peso: 7-8 kg</div>
+                            <div class="feature"><i class="fas fa-clock"></i> Curación: 36 meses</div>
+                            <div class="feature"><i class="fas fa-tag"></i> Denominación de Origen</div>
+                            <div class="feature"><i class="fas fa-shipping-fast"></i> Envío refrigerado</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="old-price">₲ 1.800.000</span>
+                                ₲ 1.530.000
+                            </div>
+                            <button class="buy-btn" onclick="comprarProducto('Jamón Ibérico de Bellota', 1530000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2: Queso Artesanal -->
+                <div class="product-card" data-category="gourmet organic">
+                    <div class="product-badge organic">ORGÁNICO</div>
+                    <div class="product-image">
+                        <i class="fas fa-cheese"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Queso Brie Artesanal</h3>
+                        <p class="product-description">Queso brie elaborado con leche cruda de vaca, maduración en bodega natural.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Rueda de 2.5 kg</div>
+                            <div class="feature"><i class="fas fa-clock"></i> Maduración: 60 días</div>
+                            <div class="feature"><i class="fas fa-leaf"></i> Leche orgánica certificada</div>
+                            <div class="feature"><i class="fas fa-home"></i> Elaboración artesanal</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 150.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Queso Brie Artesanal', 150000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3: Vino Premium -->
+                <div class="product-card" data-category="drinks gourmet">
+                    <div class="product-badge">PREMIUM</div>
+                    <div class="product-image">
+                        <i class="fas fa-wine-glass-alt"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Vino Malbec Reserva</h3>
+                        <p class="product-description">Vino tinto reserva 2018 de Mendoza, Argentina. Crianza 12 meses en roble francés.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-wine-bottle"></i> Botella 750ml</div>
+                            <div class="feature"><i class="fas fa-calendar-alt"></i> Cosecha 2018</div>
+                            <div class="feature"><i class="fas fa-award"></i> 92 puntos Parker</div>
+                            <div class="feature"><i class="fas fa-box"></i> Caja de regalo incluida</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 185.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Vino Malbec Reserva', 185000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4: Aceite de Oliva -->
+                <div class="product-card" data-category="gourmet organic">
+                    <div class="product-badge organic">ORGÁNICO</div>
+                    <div class="product-image">
+                        <i class="fas fa-oil-can"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Aceite de Oliva Extra Virgen</h3>
+                        <p class="product-description">Aceite premium primera prensada en frío, variedad arbequina. Producto orgánico certificado.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Botella 1 litro</div>
+                            <div class="feature"><i class="fas fa-snowflake"></i> Primera prensada en frío</div>
+                            <div class="feature"><i class="fas fa-leaf"></i> Certificado orgánico</div>
+                            <div class="feature"><i class="fas fa-globe-europe"></i> Importado de España</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 95.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Aceite de Oliva Extra Virgen', 95000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 5: Pan Artesanal -->
+                <div class="product-card" data-category="bakery">
+                    <div class="product-badge">RECIÉN HORNEADO</div>
+                    <div class="product-image">
+                        <i class="fas fa-bread-slice"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Pan de Masa Madre</h3>
+                        <p class="product-description">Pan artesanal de fermentación lenta (72 horas), harina orgánica y sin conservantes.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Pieza de 800g</div>
+                            <div class="feature"><i class="fas fa-clock"></i> Fermentación: 72h</div>
+                            <div class="feature"><i class="fas fa-wheat"></i> Harina orgánica integral</div>
+                            <div class="feature"><i class="fas fa-fire"></i> Horneado en piedra</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 35.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Pan de Masa Madre', 35000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 6: Café Especial -->
+                <div class="product-card" data-category="drinks gourmet">
+                    <div class="product-badge new">NUEVO</div>
+                    <div class="product-image">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Café Especial Geisha</h3>
+                        <p class="product-description">Café de especialidad variedad Geisha, tostado medio, notas frutales y florales.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Bolsa 500g</div>
+                            <div class="feature"><i class="fas fa-mountain"></i> Altura: 1800msnm</div>
+                            <div class="feature"><i class="fas fa-seedling"></i> Cultivo sostenible</div>
+                            <div class="feature"><i class="fas fa-trophy"></i> Premio de calidad</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 120.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Café Especial Geisha', 120000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 7: Miel Orgánica -->
+                <div class="product-card" data-category="organic">
+                    <div class="product-badge organic">100% NATURAL</div>
+                    <div class="product-image">
+                        <i class="fas fa-honey-pot"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Miel Orgánica Multifloral</h3>
+                        <p class="product-description">Miel pura de abejas sin procesar, cosechada en colmenares orgánicos certificados.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-weight"></i> Frasco 1kg</div>
+                            <div class="feature"><i class="fas fa-bee"></i> Apicultura orgánica</div>
+                            <div class="feature"><i class="fas fa-filter"></i> Sin pasteurizar</div>
+                            <div class="feature"><i class="fas fa-certificate"></i> Certificado ecológico</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 65.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Miel Orgánica Multifloral', 65000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 8: Cesta Regalo -->
+                <div class="product-card" data-category="gourmet">
+                    <div class="product-badge limited">EDICIÓN LIMITADA</div>
+                    <div class="product-image">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-name">Cesta Gourmet Navideña</h3>
+                        <p class="product-description">Selección premium: jamón, queso, vino, aceite y dulces. Ideal para regalo empresarial.</p>
+                        
+                        <div class="product-features">
+                            <div class="feature"><i class="fas fa-box"></i> 8 productos premium</div>
+                            <div class="feature"><i class="fas fa-gift"></i> Empaque de regalo</div>
+                            <div class="feature"><i class="fas fa-shipping-fast"></i> Envío gratis</div>
+                            <div class="feature"><i class="fas fa-edit"></i> Tarjeta personalizada</div>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price">₲ 850.000</div>
+                            <button class="buy-btn" onclick="comprarProducto('Cesta Gourmet Navideña', 850000)">
+                                <i class="fas fa-shopping-cart"></i> Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Result Section -->
+        <section class="order-result" id="order-result">
+            <div class="order-header">
+                <div class="order-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <h2 class="order-title">Detalles de tu Pedido</h2>
+            </div>
+            
+            <div class="order-status" id="order-status">
+                <div class="status-text" id="status-text">Procesando tu pedido...</div>
+                <div class="order-id" id="order-id"></div>
+            </div>
+            
+            <div class="order-actions" id="order-actions">
+                <!-- Actions will be added dynamically -->
+            </div>
+            
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--primary);">
+                    <i class="fas fa-info-circle"></i> Información importante para tu compra
+                </h3>
+                <p style="font-size: 0.9rem; color: var(--gray);">
+                    <i class="fas fa-shipping-fast" style="color: var(--secondary);"></i> Envío gratis en Asunción para pedidos mayores a ₲ 100.000<br>
+                    <i class="fas fa-clock" style="color: var(--accent);"></i> Productos perecederos: entrega en 24-48 horas<br>
+                    <i class="fas fa-undo" style="color: var(--success);"></i> 15 días para devoluciones de productos no perecederos<br>
+                    <i class="fas fa-phone" style="color: var(--primary);"></i> Atención al cliente: (021) 123-456
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">
+                <i class="fas fa-store"></i> Mercado Don Onofre
+            </h3>
+            <p>Delicatessen y productos gourmet</p>
+            
+            <div class="store-info">
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Av. España 1234, Asunción</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <span>(021) 123-456</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Lun-Sáb: 8:00-20:00</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>info@dononofre.com.py</span>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.8rem; color: var(--gray);">
+                <strong>Prueba Técnica Senior:</strong> Sistema de e-commerce integrado con AdamsPay para procesamiento de pagos seguros.
+            </p>
+        </footer>
+
+        <!-- Cart Summary (fixed) -->
+        <div class="cart-summary" id="cart-summary" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cart-count">0</span> productos
         </div>
-        
-        <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; width: 250px;">
-            <h3>🥤 Refrigerante</h3>
-            <p>Refrigerante 500ml</p>
-            <p><strong>R$ 8,00</strong></p>
-            <button onclick="buyProduct('Refrigerante', 8)"
-                    style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                Comprar
-            </button>
-        </div>
-    </div>
-    
-    <div id="result" style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 10px; display: none; background: #f9f9f9;">
-        <h3>Status do Pedido:</h3>
-        <p id="status">Processando...</p>
-        <a id="payment-link" href="#" target="_blank" 
-           style="display: none; background: #2196F3; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-            Ir para Pagamento
-        </a>
     </div>
 
     <script>
-    function buyProduct(productName, amount) {
-        const resultDiv = document.getElementById('result');
-        const statusP = document.getElementById('status');
-        const paymentLink = document.getElementById('payment-link');
+        // Estado global
+        let currentOrderId = null;
+        let cartItems = [];
         
-        resultDiv.style.display = 'block';
-        statusP.textContent = 'Criando pedido...';
-        statusP.style.color = '#333';
-        paymentLink.style.display = 'none';
-        
-        fetch('/api/orders/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                product_name: productName,
-                amount: amount
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na requisição: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Pedido criado:', data);
+        // Función para filtrar productos
+        function filterProducts(category) {
+            const products = document.querySelectorAll('.product-card');
+            const buttons = document.querySelectorAll('.category-btn');
             
-            if (data.error) {
-                statusP.textContent = 'Erro: ' + data.error;
-                statusP.style.color = 'red';
-                return;
-            }
+            // Actualizar botones activos
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                const btnText = btn.textContent.toLowerCase();
+                if (category === 'all' && btnText.includes('todos')) {
+                    btn.classList.add('active');
+                } else if (btnText.includes(category)) {
+                    btn.classList.add('active');
+                }
+            });
             
-            if (data.warning) {
-                statusP.innerHTML = `Pedido criado! ID: ${data.id}<br>
-                                    <small style="color: orange;">⚠️ ${data.warning}</small>`;
-            } else {
-                statusP.innerHTML = `✅ Pedido criado com sucesso!<br>
-                                    <small>ID: ${data.id}</small>`;
-            }
-            
-            if (data.payment_link) {
-                paymentLink.href = data.payment_link;
-                paymentLink.textContent = '👉 Ir para Pagamento AdamsPay';
-                paymentLink.style.display = 'inline-block';
+            // Mostrar/ocultar productos
+            products.forEach(product => {
+                const productCategories = product.dataset.category.split(' ');
                 
-                // Adicionar botão para ver status
-                if (!document.getElementById('status-btn')) {
-                    const statusBtn = document.createElement('button');
-                    statusBtn.id = 'status-btn';
-                    statusBtn.textContent = '🔄 Verificar Status';
-                    statusBtn.style.marginLeft = '10px';
-                    statusBtn.style.background = '#666';
-                    statusBtn.style.color = 'white';
-                    statusBtn.style.padding = '10px 15px';
-                    statusBtn.style.border = 'none';
-                    statusBtn.style.borderRadius = '5px';
-                    statusBtn.style.cursor = 'pointer';
-                    statusBtn.onclick = () => checkOrderStatus(data.id);
-                    statusP.parentNode.appendChild(statusBtn);
+                if (category === 'all' || productCategories.includes(category)) {
+                    product.style.display = 'block';
+                    setTimeout(() => {
+                        product.style.opacity = '1';
+                        product.style.transform = 'translateY(0)';
+                    }, 100);
+                } else {
+                    product.style.opacity = '0';
+                    product.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        product.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+        
+        function comprarProducto(nombreProducto, monto) {
+            const orderResult = document.getElementById('order-result');
+            const statusText = document.getElementById('status-text');
+            const orderIdElement = document.getElementById('order-id');
+            const orderActions = document.getElementById('order-actions');
+            
+            // Agregar al carrito
+            cartItems.push({
+                name: nombreProducto,
+                price: monto,
+                timestamp: new Date().toISOString()
+            });
+            updateCartSummary();
+            
+            // Mostrar sección de resultado
+            orderResult.style.display = 'block';
+            orderResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Resetear estado
+            statusText.innerHTML = `
+                <span style="color: #8B4513;">
+                    <i class="fas fa-spinner fa-spin"></i> Preparando tu pedido...
+                </span>
+            `;
+            orderIdElement.textContent = '';
+            orderActions.innerHTML = '';
+            
+            // Deshabilitar botones temporalmente
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Procesando...`;
+                btn.dataset.original = originalText;
+            });
+            
+            // Formatear monto para API (centavos)
+            const amountInCents = monto;
+            
+            // Realizar solicitud a la API
+            fetch('/api/orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_name: nombreProducto,
+                    amount: amountInCents,
+                    currency: 'PYG'
+                })
+            })
+            .then(async response => {
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `Error HTTP: ${response.status}`);
                 }
                 
-                // Redireciona automaticamente após 5 segundos
-                setTimeout(() => {
-                    if (data.payment_link && !data.payment_link.includes('fallback')) {
-                        window.location.href = data.payment_link;
+                return data;
+            })
+            .then(datos => {
+                console.log('Respuesta del servidor:', datos);
+                currentOrderId = datos.id;
+                
+                // Actualizar estado
+                if (datos.error) {
+                    statusText.innerHTML = `
+                        <span style="color: #8B0000;">
+                            <i class="fas fa-exclamation-circle"></i> Error: ${datos.error}
+                        </span>
+                    `;
+                } else {
+                    // Mostrar información del pedido
+                    orderIdElement.textContent = `ID del Pedido: ${datos.id}`;
+                    
+                    if (datos.warning) {
+                        statusText.innerHTML = `
+                            <span style="color: #D2691E;">
+                                <i class="fas fa-exclamation-triangle"></i> Pedido creado con advertencia: ${datos.warning}
+                            </span>
+                        `;
+                    } else {
+                        statusText.innerHTML = `
+                            <span style="color: #2E8B57;">
+                                <i class="fas fa-check-circle"></i> ¡Pedido creado con éxito!
+                            </span>
+                        `;
                     }
-                }, 5000);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            statusP.textContent = 'Erro ao criar pedido: ' + error.message;
-            statusP.style.color = 'red';
-        });
-    }
-
-    function checkOrderStatus(orderId) {
-        fetch(`/api/orders/${orderId}/`)
-            .then(response => response.json())
-            .then(data => {
-                alert(`Status do pedido: ${data.status}`);
+                    
+                    // Mostrar acciones disponibles
+                    orderActions.innerHTML = '';
+                    
+                    if (datos.payment_link) {
+                        const paymentLink = document.createElement('a');
+                        paymentLink.href = datos.payment_link;
+                        paymentLink.className = 'payment-link';
+                        paymentLink.target = '_blank';
+                        paymentLink.innerHTML = `
+                            <i class="fas fa-external-link-alt"></i>
+                            Proceder al Pago con AdamsPay
+                        `;
+                        orderActions.appendChild(paymentLink);
+                        
+                        // Botón para verificar estado
+                        const statusBtn = document.createElement('button');
+                        statusBtn.className = 'status-btn';
+                        statusBtn.innerHTML = `
+                            <i class="fas fa-sync-alt"></i>
+                            Verificar Estado del Pago
+                        `;
+                        statusBtn.onclick = () => verificarEstadoPedido(datos.id);
+                        orderActions.appendChild(statusBtn);
+                        
+                        // Botón para seguir comprando
+                        const continueBtn = document.createElement('button');
+                        continueBtn.className = 'status-btn';
+                        continueBtn.style.background = '#3498db';
+                        continueBtn.innerHTML = `
+                            <i class="fas fa-shopping-cart"></i>
+                            Seguir Comprando
+                        `;
+                        continueBtn.onclick = () => {
+                            orderResult.style.display = 'none';
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        };
+                        orderActions.appendChild(continueBtn);
+                        
+                        // Contador para redirección automática
+                        let countdown = 8;
+                        const countdownElement = document.createElement('div');
+                        countdownElement.style.marginTop = '15px';
+                        countdownElement.style.color = 'var(--primary)';
+                        countdownElement.style.fontSize = '0.9rem';
+                        countdownElement.style.fontWeight = '600';
+                        countdownElement.id = 'countdown';
+                        orderActions.appendChild(countdownElement);
+                        
+                        const countdownInterval = setInterval(() => {
+                            countdownElement.innerHTML = `
+                                <i class="fas fa-clock"></i>
+                                Redirigiendo a AdamsPay en ${countdown} segundos...
+                            `;
+                            countdown--;
+                            
+                            if (countdown < 0) {
+                                clearInterval(countdownInterval);
+                                if (datos.payment_link && !datos.payment_link.includes('fallback')) {
+                                    window.open(datos.payment_link, '_blank');
+                                }
+                            }
+                        }, 1000);
+                    }
+                }
             })
             .catch(error => {
-                console.error('Erro ao verificar status:', error);
+                console.error('Error:', error);
+                statusText.innerHTML = `
+                    <span style="color: #8B0000;">
+                        <i class="fas fa-times-circle"></i> Error: ${error.message}
+                    </span>
+                `;
+                
+                // Mostrar botón para reintentar
+                const retryBtn = document.createElement('button');
+                retryBtn.className = 'status-btn';
+                retryBtn.innerHTML = `<i class="fas fa-redo"></i> Reintentar Compra`;
+                retryBtn.onclick = () => comprarProducto(nombreProducto, monto);
+                orderActions.appendChild(retryBtn);
+            })
+            .finally(() => {
+                // Rehabilitar botones
+                document.querySelectorAll('.buy-btn').forEach(btn => {
+                    if (btn.dataset.original) {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.original;
+                    }
+                });
             });
-    }
+        }
+        
+        function verificarEstadoPedido(idPedido) {
+            const statusText = document.getElementById('status-text');
+            const previousText = statusText.innerHTML;
+            
+            statusText.innerHTML = `
+                <span style="color: #8B4513;">
+                    <i class="fas fa-spinner fa-spin"></i> Consultando estado del pago...
+                </span>
+            `;
+            
+            fetch(`/api/orders/${idPedido}/`)
+                .then(response => response.json())
+                .then(datos => {
+                    let statusColor, statusIcon, statusMessage, additionalInfo;
+                    
+                    switch(datos.status) {
+                        case 'pending':
+                            statusColor = '#8B4513';
+                            statusIcon = '<i class="fas fa-clock"></i>';
+                            statusMessage = 'Pendiente de pago';
+                            additionalInfo = 'Por favor, completa el pago para procesar tu pedido.';
+                            break;
+                        case 'paid':
+                            statusColor = '#2E8B57';
+                            statusIcon = '<i class="fas fa-check-circle"></i>';
+                            statusMessage = '¡Pago Confirmado!';
+                            additionalInfo = 'Tu pedido está siendo preparado para el envío.';
+                            break;
+                        case 'failed':
+                            statusColor = '#8B0000';
+                            statusIcon = '<i class="fas fa-times-circle"></i>';
+                            statusMessage = 'Pago Fallido';
+                            additionalInfo = 'El pago no pudo ser procesado. Intenta nuevamente.';
+                            break;
+                        default:
+                            statusColor = '#8B4513';
+                            statusIcon = '<i class="fas fa-info-circle"></i>';
+                            statusMessage = datos.status || 'Estado desconocido';
+                            additionalInfo = 'Contacta a nuestro servicio al cliente.';
+                    }
+                    
+                    statusText.innerHTML = `
+                        <span style="color: ${statusColor}">
+                            ${statusIcon} ${statusMessage}
+                        </span>
+                    `;
+                    
+                    // Mostrar alerta detallada
+                    setTimeout(() => {
+                        const productPrice = datos.amount ? `₲ ${parseInt(datos.amount).toLocaleString('es-PY')}` : 'N/A';
+                        alert(`🏪 **Mercado Don Onofre**\n\n` +
+                              `📦 **Pedido #${idPedido}**\n` +
+                              `🍽️ **Producto:** ${datos.product_name || 'N/A'}\n` +
+                              `💰 **Total:** ${productPrice}\n` +
+                              `📊 **Estado:** ${statusMessage}\n` +
+                              `📅 **Fecha:** ${new Date(datos.created_at).toLocaleString('es-PY')}\n\n` +
+                              `💡 **Información:** ${additionalInfo}\n\n` +
+                              `📞 **Contacto:** (021) 123-456`);
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error('Error al verificar estado:', error);
+                    statusText.innerHTML = previousText;
+                    alert('❌ Error al verificar el estado del pedido. Por favor, intenta nuevamente o contacta a nuestro servicio al cliente.');
+                });
+        }
+        
+        function updateCartSummary() {
+            const cartSummary = document.getElementById('cart-summary');
+            const cartCount = document.getElementById('cart-count');
+            
+            cartCount.textContent = cartItems.length;
+            
+            if (cartItems.length > 0) {
+                cartSummary.style.display = 'flex';
+                
+                // Mostrar tooltip con resumen
+                cartSummary.title = `Productos en carrito:\n${cartItems.map(item => `• ${item.name} - ₲ ${item.price.toLocaleString('es-PY')}`).join('\n')}`;
+            }
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            // Efecto de aparición suave para las tarjetas
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            // Formatear todos los precios
+            document.querySelectorAll('.product-price').forEach(priceElement => {
+                const priceText = priceElement.textContent;
+                const numbers = priceText.match(/\d+/g);
+                if (numbers) {
+                    numbers.forEach(num => {
+                        const formatted = parseInt(num).toLocaleString('es-PY');
+                        priceElement.innerHTML = priceElement.innerHTML.replace(num, formatted);
+                    });
+                }
+            });
+            
+            // Configurar el carrito
+            const cartSummary = document.getElementById('cart-summary');
+            cartSummary.addEventListener('click', () => {
+                if (cartItems.length > 0) {
+                    alert(`🛒 **Tu Carrito de Compras**\n\n` +
+                          `${cartItems.map((item, index) => `${index + 1}. ${item.name} - ₲ ${item.price.toLocaleString('es-PY')}`).join('\n')}\n\n` +
+                          `💰 **Total:** ₲ ${cartItems.reduce((sum, item) => sum + item.price, 0).toLocaleString('es-PY')}\n\n` +
+                          `*Los productos se procesan individualmente para mejor control de inventario.`);
+                }
+            });
+        });
     </script>
-    
-    <style>
-    body {
-        font-family: Arial, sans-serif;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-        background: #f5f5f5;
-    }
-    h1 {
-        color: #333;
-        border-bottom: 2px solid #4CAF50;
-        padding-bottom: 10px;
-    }
-    button:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-        transition: all 0.3s;
-    }
-    #result {
-        max-width: 500px;
-    }
-    </style>
 </body>
 </html>

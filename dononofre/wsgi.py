@@ -1,9 +1,9 @@
 """
-WSGI config for dononofre project.
+Configuración WSGI para el proyecto dononofre.
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+Expone la aplicación WSGI como una variable a nivel de módulo llamada ``application``.
 
-For more information on this file, see
+Para más información sobre este archivo, consulta:
 https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 """
 
@@ -13,10 +13,10 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dononofre.settings')
 
-# FORÇAR MIGRAÇÕES ANTES DE INICIAR
+# Migraciones antes de iniciar
 if os.getenv('RENDER'):
-    print("=== AMBIENTE RENDER DETECTADO ===")
-    print("Forçando migrações no PostgreSQL...")
+    print("Entorno render detectado")
+    print("Migraciones en PostgreSQL...")
     
     try:
         # Configurar Django
@@ -26,7 +26,7 @@ if os.getenv('RENDER'):
         from django.db import connection
         from django.core.management import execute_from_command_line
         
-        # Verificar se a tabela existe
+        # Verificar si la tabla existe
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT EXISTS (
@@ -38,15 +38,15 @@ if os.getenv('RENDER'):
             table_exists = cursor.fetchone()[0]
             
             if not table_exists:
-                print("Tabela 'orders_order' não existe. Executando migrações...")
+                print("Tabla 'orders_order' no existe. Ejecutando migraciones...")
                 
-                # Executar migrações
+                # Ejecutar migraciones
                 execute_from_command_line(['manage.py', 'makemigrations', '--noinput'])
                 execute_from_command_line(['manage.py', 'migrate', '--noinput'])
                 
-                print("Migrações executadas com sucesso!")
+                print("Migraciones ejecutadas con éxito!")
                 
-                # Verificar novamente
+                # Verificar nuevamente
                 cursor.execute("""
                     SELECT EXISTS (
                         SELECT FROM information_schema.tables 
@@ -56,14 +56,14 @@ if os.getenv('RENDER'):
                 """)
                 table_exists = cursor.fetchone()[0]
                 if table_exists:
-                    print("✓ Tabela 'orders_order' criada com sucesso!")
+                    print("Tabla 'orders_order' creada con éxito!")
                 else:
-                    print("✗ Ainda não foi criada!")
+                    print("¡Aún no se ha creado!")
             else:
-                print("✓ Tabela 'orders_order' já existe")
+                print("Tabla 'orders_order' ya existe")
                 
     except Exception as e:
-        print(f"Erro ao executar migrações: {e}")
-        print("Continuando sem migrações...")
+        print(f"Error al ejecutar migraciones: {e}")
+        print("Continuando sin migraciones...")
 
 application = get_wsgi_application()

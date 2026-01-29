@@ -1,30 +1,30 @@
 #!/bin/bash
-# Script para rodar o servidor Don Onofre
+# Script para ejecutar el servidor Don Onofre
 
-# Carregar configurações do ambiente
+# Cargar configuraciones del entorno
 source setup_env.sh
 
 echo ''
-echo '=== INICIANDO SERVIDOR DON ONOFRE ==='
-echo 'Data/Hora: $(date)'
-echo 'Porta: 8001'
+echo 'Iniciando Servidor Don Onofre'
+echo 'Fecha/Hora: $(date)'
+echo 'Puerto: 8001'
 echo 'URL: http://localhost:8001/'
 echo ''
 
-# Verificar se a porta 8001 está em uso
+# Verificar si el puerto 8001 está en uso
 if lsof -Pi :8001 -sTCP:LISTEN -t >/dev/null ; then
-    echo 'ERRO: A porta 8001 já está em uso!'
-    echo 'Processo usando a porta:'
+    echo 'ERROR: ¡El puerto 8001 ya está en uso!'
+    echo 'Proceso usando el puerto:'
     lsof -Pi :8001 -sTCP:LISTEN
     echo ''
-    echo 'Opções:'
-    echo '1. Mate o processo: kill -9 $(lsof -t -i:8001)'
-    echo '2. Use outra porta: python manage.py runserver 8002'
+    echo 'Opciones:'
+    echo '1. Matar el proceso: kill -9 $(lsof -t -i:8001)'
+    echo '2. Usar otro puerto: python manage.py runserver 8002'
     exit 1
 fi
 
 echo 'Iniciando Django...'
-echo 'Pressione Ctrl+C para parar'
+echo 'Presione Ctrl+C para detener'
 echo '----------------------------------------'
 echo ''
 

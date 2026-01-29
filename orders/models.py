@@ -19,5 +19,5 @@ class Order(models.Model):
         return f"{self.product_name} - {self.get_status_display()}"
     
     def get_status_display(self):
-        """Retorna o display name do status"""
+        """Devuelve el nombre para mostrar del estado."""
         return dict(self.STATUS_CHOICES).get(self.status, self.status)

@@ -1,4 +1,4 @@
-# views.py - VERSÃO COMPLETA E CORRIGIDA
+# views.py - VERSIÓN COMPLETA Y CORREGIDA
 
 from django.shortcuts import render
 from rest_framework.decorators import api_view
@@ -16,47 +16,47 @@ from datetime import datetime, timedelta
 def home(request):
     return render(request, 'index.html')
 
-# ============= CONFIGURAÇÕES ADAMSPAY =============
-# Baseado na documentação e na sua aplicação "website"
+# ============= CONFIGURACIONES ADAMSPAY =============
+# Basado en la documentación y en su aplicación "website"
 ADAMSPAY_BASE_URL = os.getenv('ADAMSPAY_BASE_URL', 'https://staging.adamspay.com')
-ADAMSPAY_API_URL = f"{ADAMSPAY_BASE_URL}/api/v1/debts"  # CORRETO
+ADAMSPAY_API_URL = f"{ADAMSPAY_BASE_URL}/api/v1/debts"  # CORRECTO
 ADAMSPAY_API_KEY = os.getenv('ADAMSPAY_API_KEY', '')
 ADAMSPAY_APP_SECRET = os.getenv('ADAMSPAY_APP_SECRET', '')
-ADAMSPAY_APP_SLUG = os.getenv('ADAMSPAY_APP_SLUG', 'website')  # Slug da sua aplicação
+ADAMSPAY_APP_SLUG = os.getenv('ADAMSPAY_APP_SLUG', 'website')  # Slug de su aplicación
 ADAMSPAY_CALLBACK_URL = os.getenv('ADAMSPAY_CALLBACK_URL', 'https://don-onofre-adamspay.onrender.com/api/adams/callback/')
 
-# ============= CRIAR PEDIDO =============
+# ============= CREAR PEDIDO =============
 @api_view(['POST'])
 def create_order(request):
     try:
         print("=" * 50)
-        print("🛒 CRIANDO PEDIDO - ADAMSPAY")
-        print("Dados recebidos:", request.data)
+        print("🛒 CREANDO PEDIDO - ADAMSPAY")
+        print("Datos recibidos:", request.data)
         
-        # Validar dados
+        # Validar datos
         product_name = request.data.get('product_name')
         amount = request.data.get('amount')
         
         if not product_name or not amount:
             return Response(
-                {'error': 'product_name e amount são obrigatórios'},
+                {'error': 'product_name y amount son obligatorios'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Criar pedido
+        # Crear pedido
         order = Order.objects.create(
             product_name=product_name,
             amount=amount,
             status='PENDING'
         )
         
-        print(f"✅ Pedido criado: {order.id}")
+        print(f"✅ Pedido creado: {order.id}")
         
-        # Se não tem API Key, usar modo simulação
-        if not ADAMSPAY_API_KEY or ADAMSPAY_API_KEY == 'sua_api_key_aqui':
-            print("⚠️ MODO SIMULAÇÃO - Configure uma API Key real")
+        # Si no tiene API Key, usar modo simulación
+        if not ADAMSPAY_API_KEY or ADAMSPAY_API_KEY == 'su_api_key_aqui':
+            print("⚠️ MODO SIMULACIÓN - Configure una API Key real")
             
-            # URL no formato correto: /pay/{app_slug}/debt/{debt_id}
+            # URL en el formato correcto: /pay/{app_slug}/debt/{debt_id}
             payment_url = f"{ADAMSPAY_BASE_URL}/pay/{ADAMSPAY_APP_SLUG}/debt/{order.id}"
             order.payment_link = payment_url
             order.save()
@@ -67,19 +67,19 @@ def create_order(request):
                 'amount': str(order.amount),
                 'status': order.status,
                 'payment_link': payment_url,
-                'warning': 'Configure ADAMSPAY_API_KEY no Render para integração real'
+                'warning': 'Configure ADAMSPAY_API_KEY en Render para integración real'
             })
         
-        # ========== INTEGRAÇÃO REAL COM ADAMSPAY ==========
-        # Converter valor para PYG (Guarani Paraguaio)
-        # 1 BRL ≈ 1000 PYG (ajuste conforme taxa atual)
+        # ========== INTEGRACIÓN REAL CON ADAMSPAY ==========
+        # Convertir valor a PYG (Guaraní Paraguayo)
+        # 1 BRL ≈ 1000 PYG (ajuste según tasa actual)
         valor_pyg = int(float(amount) * 1000)
         
-        # Datas de validade (2 dias como exemplo)
+        # Fechas de validez (2 días como ejemplo)
         inicio = datetime.now()
-        fim = inicio + timedelta(days=2)
+        fin = inicio + timedelta(days=2)
         
-        # Payload baseado na documentação
+        # Payload basado en la documentación
         payload = {
             "debt": {
                 "docId": str(order.id),  # ID único
@@ -90,7 +90,7 @@ def create_order(request):
                 },
                 "validPeriod": {
                     "start": inicio.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "end": fim.strftime("%Y-%m-%dT%H:%M:%S")
+                    "end": fin.strftime("%Y-%m-%dT%H:%M:%S")
                 },
                 "target": {
                     "type": "WEB",
@@ -99,17 +99,17 @@ def create_order(request):
             }
         }
         
-        # Headers baseados na documentação
+        # Headers basados en la documentación
         headers = {
             "apikey": ADAMSPAY_API_KEY,
             "Content-Type": "application/json",
             "x-if-exists": "update"
         }
         
-        print(f"🌐 Chamando AdamsPay: {ADAMSPAY_API_URL}")
+        print(f"🌐 Llamando a AdamsPay: {ADAMSPAY_API_URL}")
         print(f"📤 Payload: {json.dumps(payload, indent=2)}")
         
-        # Fazer a requisição
+        # Hacer la solicitud
         response = requests.post(
             ADAMSPAY_API_URL,
             json=payload,
@@ -117,11 +117,11 @@ def create_order(request):
             timeout=30
         )
         
-        print(f"📥 Status: {response.status_code}")
+        print(f"📥 Estado: {response.status_code}")
         
         if response.status_code in [200, 201]:
             data = response.json()
-            print(f"✅ Resposta: {json.dumps(data, indent=2)}")
+            print(f"✅ Respuesta: {json.dumps(data, indent=2)}")
             
             if 'debt' in data and 'payUrl' in data['debt']:
                 payment_url = data['debt']['payUrl']
@@ -135,11 +135,11 @@ def create_order(request):
                     'status': order.status,
                     'payment_link': payment_url,
                     'adamspay_id': data['debt'].get('id'),
-                    'message': 'Pagamento criado na AdamsPay'
+                    'message': 'Pago creado en AdamsPay'
                 })
         
-        # Se chegou aqui, houve erro
-        print(f"❌ Erro: {response.text}")
+        # Si llegó aquí, hubo error
+        print(f"❌ Error: {response.text}")
         
         # Fallback: URL simulada
         payment_url = f"{ADAMSPAY_BASE_URL}/pay/{ADAMSPAY_APP_SLUG}/debt/{order.id}"
@@ -152,11 +152,11 @@ def create_order(request):
             'amount': str(order.amount),
             'status': order.status,
             'payment_link': payment_url,
-            'warning': f'Erro AdamsPay {response.status_code} - Usando URL simulada'
+            'warning': f'Error AdamsPay {response.status_code} - Usando URL simulada'
         })
         
     except Exception as e:
-        print(f"❌ ERRO: {str(e)}")
+        print(f"❌ ERROR: {str(e)}")
         print(traceback.format_exc())
         return Response(
             {'error': str(e)},
@@ -166,38 +166,38 @@ def create_order(request):
 # ============= WEBHOOK (CALLBACK) =============
 @api_view(['POST'])
 def adams_callback(request):
-    """Webhook para receber notificações da AdamsPay"""
+    """Webhook para recibir notificaciones de AdamsPay"""
     try:
         print("=" * 50)
         print("📬 WEBHOOK ADAMSPAY")
-        print(f"📦 Dados: {request.data}")
+        print(f"📦 Datos: {request.data}")
         
         # VALIDAR HMAC (secreto)
         if ADAMSPAY_APP_SECRET:
-            # Implementar validação HMAC aqui
+            # Implementar validación HMAC aquí
             pass
         
-        # Processar notificação
+        # Procesar notificación
         data = request.data
         
-        # Extrair ID do pedido
+        # Extraer ID del pedido
         order_id = None
         
-        # Tentar diferentes formatos
+        # Intentar diferentes formatos
         if 'externalId' in data:
             order_id = data['externalId']
         elif 'debt' in data and 'docId' in data['debt']:
             order_id = data['debt']['docId']
         
         if not order_id:
-            return Response({'error': 'ID não encontrado'}, status=400)
+            return Response({'error': 'ID no encontrado'}, status=400)
         
         # Buscar pedido
         try:
             order = Order.objects.get(id=order_id)
             print(f"✅ Pedido encontrado: {order.id}")
             
-            # Atualizar status
+            # Actualizar estado
             status_map = {
                 'paid': 'PAID',
                 'approved': 'PAID',
@@ -212,9 +212,9 @@ def adams_callback(request):
                 if order.status != new_status:
                     order.status = new_status
                     order.save()
-                    print(f"✅ Status atualizado para: {new_status}")
+                    print(f"✅ Estado actualizado a: {new_status}")
             
-            # Resposta de sucesso
+            # Respuesta de éxito
             return Response({
                 'ok': True,
                 'order_id': str(order_id),
@@ -222,17 +222,17 @@ def adams_callback(request):
             }, status=200)
             
         except Order.DoesNotExist:
-            print(f"❌ Pedido não existe: {order_id}")
-            return Response({'error': 'Pedido não encontrado'}, status=404)
+            print(f"❌ Pedido no existe: {order_id}")
+            return Response({'error': 'Pedido no encontrado'}, status=404)
             
     except Exception as e:
-        print(f"❌ ERRO webhook: {str(e)}")
+        print(f"❌ ERROR webhook: {str(e)}")
         return Response({'error': str(e)}, status=500)
 
-# ============= OUTRAS VIEWS =============
+# ============= OTRAS VIEWS =============
 @api_view(['GET'])
 def order_status(request, order_id):
-    """Consultar status do pedido"""
+    """Consultar estado del pedido"""
     try:
         order = Order.objects.get(id=order_id)
         return Response({
@@ -244,15 +244,15 @@ def order_status(request, order_id):
             'created_at': order.created_at
         })
     except Order.DoesNotExist:
-        return Response({'error': 'Pedido não encontrado'}, status=404)
+        return Response({'error': 'Pedido no encontrado'}, status=404)
     
 @api_view(['GET'])
 def test_webhook(request, order_id):
-    """Testar manualmente o webhook (para desenvolvimento)"""
+    """Probar manualmente el webhook (para desarrollo)"""
     try:
         order = Order.objects.get(id=order_id)
         
-        # Simular dados que a AdamsPay enviaria
+        # Simular datos que AdamsPay enviaría
         test_data = {
             "externalId": str(order.id),
             "status": "paid",
@@ -270,7 +270,7 @@ def test_webhook(request, order_id):
             }
         }
         
-        # Chamar o webhook internamente
+        # Llamar al webhook internamente
         from django.test import RequestFactory
         factory = RequestFactory()
         webhook_request = factory.post(
@@ -279,10 +279,10 @@ def test_webhook(request, order_id):
             content_type='application/json'
         )
         
-        # Processar como se fosse da AdamsPay
+        # Procesar como si fuera de AdamsPay
         response = adams_callback(webhook_request)
         
-        # Recarregar order para ver mudanças
+        # Recargar order para ver cambios
         order.refresh_from_db()
         
         return Response({
@@ -295,4 +295,4 @@ def test_webhook(request, order_id):
         })
         
     except Order.DoesNotExist:
-        return Response({'error': 'Order not found'}, status=404)
+        return Response({'error': 'Pedido no encontrado'}, status=404)

@@ -1,14 +1,14 @@
 #!/bin/bash
-# Script de build para Render
+# Crear script para renderizar
 
-echo "=== FAZENDO BUILD DA APLICAÇÃO ==="
+echo "Construyendo la aplicación "
 
-# Instalar dependências
+# Instalar dependencias
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Verificar instalações
+# Comprobar instalaciones
 echo "Django: $(python -c "import django; print(django.get_version())")"
 echo "Psycopg2: $(python -c "import psycopg2; print(psycopg2.__version__)")"
 
-echo "=== BUILD COMPLETO ==="
+echo "Build Completo"
