@@ -11,8 +11,4 @@ pip install -r requirements.txt
 echo "Django: $(python -c "import django; print(django.get_version())")"
 echo "Psycopg2: $(python -c "import psycopg2; print(psycopg2.__version__)")"
 
-# Tornar scripts executáveis
-chmod +x startup.sh
-chmod +x build.sh
-
 echo "=== BUILD COMPLETO ==="

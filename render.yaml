@@ -2,13 +2,10 @@ services:
   - type: web
     name: don-onofre-adamspay
     env: python
-    buildCommand: ./build.sh
-    startCommand: |
-      echo "=== EXECUTANDO STARTUP SCRIPT ===" &&
-      python manage.py makemigrations --noinput &&
-      python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput &&
-      gunicorn dononofre.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: gunicorn dononofre.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         value: postgresql://dononofredb_user:ZWZ2GNPDnJRkN607xUINJ2jPL4drwXZW@dpg-d5t7p8chg0os73a4idq0-a/dononofredb
