@@ -14,3 +14,10 @@ class Order(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     payment_link = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.product_name} - {self.get_status_display()}"
+    
+    def get_status_display(self):
+        """Retorna o display name do status"""
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)

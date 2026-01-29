@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação de Pagamento - Don Onofre</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .pending { background: #fff3cd; color: #856404; }
+        .paid { background: #d4edda; color: #155724; }
+        .failed { background: #f8d7da; color: #721c24; }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Simulação de Pagamento</h1>
+        
+        <div class="info">
+            <p><strong>ID do Pedido:</strong> {{ order_id }}</p>
+            <p><strong>Produto:</strong> {{ product_name }}</p>
+            <p><strong>Valor:</strong> R$ {{ amount }}</p>
+            <p><strong>Status Atual:</strong> 
+                <span class="status {{ status|lower }}">{{ status }}</span>
+            </p>
+        </div>
+        
+        <p>Esta é uma página de simulação para testes. Em produção, esta seria a página de pagamento da AdamsPay.</p>
+        
+        <h3>Testar mudança de status:</h3>
+        
+        <button class="button" onclick="updateStatus('PAID')">
+            ✅ Simular Pagamento Aprovado
+        </button>
+        
+        <button class="button secondary" onclick="updateStatus('PENDING')">
+            ⏳ Simular Pagamento Pendente
+        </button>
+        
+        <button class="button danger" onclick="updateStatus('FAILED')">
+            ❌ Simular Pagamento Recusado
+        </button>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <a href="/" class="button">🏠 Voltar à Loja</a>
+            <a href="/api/orders/{{ order_id }}/" class="button secondary">
+                🔄 Verificar Status Real
+            </a>
+        </div>
+    </div>
+    
+    <script>
+    function updateStatus(newStatus) {
+        // Simular webhook da AdamsPay
+        const webhookData = {
+            externalId: "{{ order_id }}",
+            status: newStatus.toLowerCase(),
+            simulated: true,
+            timestamp: new Date().toISOString()
+        };
+        
+        fetch('/api/adams/callback/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Status atualizado para: ${newStatus}\n\nResposta: ${JSON.stringify(data, null, 2)}`);
+            location.reload();
+        })
+        .catch(error => {
+            alert('Erro ao atualizar status: ' + error.message);
+        });
+    }
+    
+    // Auto-atualizar status a cada 10 segundos
+    setInterval(() => {
+        fetch(`/api/orders/{{ order_id }}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.status !== "{{ status }}") {
+                    location.reload();
+                }
+            });
+    }, 10000);
+    </script>
+</body>
+</html>

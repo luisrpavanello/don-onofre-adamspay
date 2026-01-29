@@ -59,6 +59,7 @@
         
         resultDiv.style.display = 'block';
         statusP.textContent = 'Criando pedido...';
+        statusP.style.color = '#333';
         paymentLink.style.display = 'none';
         
         fetch('/api/orders/', {
@@ -79,17 +80,48 @@
         })
         .then(data => {
             console.log('Pedido criado:', data);
-            statusP.textContent = `Pedido criado com sucesso! ID: ${data.id}`;
+            
+            if (data.error) {
+                statusP.textContent = 'Erro: ' + data.error;
+                statusP.style.color = 'red';
+                return;
+            }
+            
+            if (data.warning) {
+                statusP.innerHTML = `Pedido criado! ID: ${data.id}<br>
+                                    <small style="color: orange;">⚠️ ${data.warning}</small>`;
+            } else {
+                statusP.innerHTML = `✅ Pedido criado com sucesso!<br>
+                                    <small>ID: ${data.id}</small>`;
+            }
             
             if (data.payment_link) {
                 paymentLink.href = data.payment_link;
-                paymentLink.textContent = 'Clique aqui para pagar';
+                paymentLink.textContent = '👉 Ir para Pagamento AdamsPay';
                 paymentLink.style.display = 'inline-block';
                 
-                // Redireciona automaticamente após 3 segundos
+                // Adicionar botão para ver status
+                if (!document.getElementById('status-btn')) {
+                    const statusBtn = document.createElement('button');
+                    statusBtn.id = 'status-btn';
+                    statusBtn.textContent = '🔄 Verificar Status';
+                    statusBtn.style.marginLeft = '10px';
+                    statusBtn.style.background = '#666';
+                    statusBtn.style.color = 'white';
+                    statusBtn.style.padding = '10px 15px';
+                    statusBtn.style.border = 'none';
+                    statusBtn.style.borderRadius = '5px';
+                    statusBtn.style.cursor = 'pointer';
+                    statusBtn.onclick = () => checkOrderStatus(data.id);
+                    statusP.parentNode.appendChild(statusBtn);
+                }
+                
+                // Redireciona automaticamente após 5 segundos
                 setTimeout(() => {
-                    window.location.href = data.payment_link;
-                }, 3000);
+                    if (data.payment_link && !data.payment_link.includes('fallback')) {
+                        window.location.href = data.payment_link;
+                    }
+                }, 5000);
             }
         })
         .catch(error => {
@@ -97,6 +129,17 @@
             statusP.textContent = 'Erro ao criar pedido: ' + error.message;
             statusP.style.color = 'red';
         });
+    }
+
+    function checkOrderStatus(orderId) {
+        fetch(`/api/orders/${orderId}/`)
+            .then(response => response.json())
+            .then(data => {
+                alert(`Status do pedido: ${data.status}`);
+            })
+            .catch(error => {
+                console.error('Erro ao verificar status:', error);
+            });
     }
     </script>
     

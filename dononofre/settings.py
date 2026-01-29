@@ -152,3 +152,8 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+# AdamsPay Configuration (use environment variables in production)
+ADAMSPAY_BASE_URL = os.getenv('ADAMSPAY_BASE_URL', 'https://app.adamspay.com')
+ADAMSPAY_API_KEY = os.getenv('ADAMSPAY_API_KEY', '')
+ADAMSPAY_CALLBACK_URL = os.getenv('ADAMSPAY_CALLBACK_URL', '')
