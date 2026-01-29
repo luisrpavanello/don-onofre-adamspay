@@ -2,17 +2,19 @@ services:
   - type: web
     name: don-onofre-adamspay
     env: python
-    buildCommand: pip install -r requirements.txt && pip install psycopg2-binary
+    buildCommand: ./build.sh
     startCommand: ./startup.sh
     envVars:
       - key: DATABASE_URL
-        value: postgresql://dononofredb_user:ZWZ2GNPDnJRkN607xUINJ2jPL4drwXZW@dpg-d5t7p8chg0os73a4idq0-a.oregon-postgres.render.com/dononofredb
+        value: postgresql://dononofredb_user:ZWZ2GNPDnJRkN607xUINJ2jPL4drwXZW@dpg-d5t7p8chg0os73a4idq0-a/dononofredb
+      - key: RENDER
+        value: true
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: false
-      - key: PYTHON_VERSION
-        value: 3.10.0
+      - key: PORT
+        value: 10000
     disk:
       name: data
       mountPath: /opt/render/project/data
