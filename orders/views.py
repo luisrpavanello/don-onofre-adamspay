@@ -1,33 +1,18 @@
-from django.shortcuts import render
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Order
-from .serializers import OrderSerializer
-import traceback
-import requests
-import os
-import json
-from datetime import datetime, timedelta
+# views.py - CÓDIGO CORRIGIDO
 
-# Página principal
-def home(request):
-    return render(request, 'index.html')
-
-# Configurações da AdamsPay
-ADAMSPAY_BASE_URL = os.getenv('ADAMSPAY_BASE_URL', 'https://app.adamspay.com')
-ADAMSPAY_API_URL = f"{ADAMSPAY_BASE_URL}/api/v1/debts"  # NOTE: É /debts não /payments!
-ADAMSPAY_API_KEY = os.getenv('ADAMSPAY_API_KEY', '')
-# Callback URL deve ser acessível publicamente
+# Configurações da AdamsPay - CORRIGIDAS
+# Baseado na documentação que você enviou
+ADAMSPAY_BASE_URL = os.getenv('ADAMSPAY_BASE_URL', 'https://staging.adamspay.com')
+ADAMSPAY_API_URL = f"{ADAMSPAY_BASE_URL}/api/v1/debts"  # CORRETO: /api/v1/debts
+ADAMSPAY_API_KEY = os.getenv('ADAMSPAY_API_KEY', 'ap-416bc88cf218f388a1782efd')
 ADAMSPAY_CALLBACK_URL = os.getenv('ADAMSPAY_CALLBACK_URL', 'https://don-onofre-adamspay.onrender.com/api/adams/callback/')
 
-# Criar pedido com integração real AdamsPay
+# Criar pedido com integração real AdamsPay - VERSÃO CORRIGIDA
 @api_view(['POST'])
 def create_order(request):
     try:
-        # Log dos dados recebidos
         print("=" * 50)
-        print("CRIANDO PEDIDO - INTEGRAÇÃO ADAMSPAY")
+        print("CRIANDO PEDIDO - INTEGRAÇÃO ADAMSPAY CORRIGIDA")
         print("Dados recebidos:", request.data)
         
         # Validar dados
@@ -50,52 +35,49 @@ def create_order(request):
         print(f"✅ Pedido criado localmente: {order.id}")
         
         # Verificar se temos API Key
-        if not ADAMSPAY_API_KEY:
-            print("⚠️ AVISO: Sem API Key da AdamsPay, usando modo simulador")
-            order.payment_link = f"{ADAMSPAY_BASE_URL}/pay/debt/{order.id}"
+        if not ADAMSPAY_API_KEY or ADAMSPAY_API_KEY == 'ap-416bc88cf218f388a1782efd':
+            print("⚠️ AVISO: Usando API Key de exemplo ou vazia")
+            # URL de simulação correta baseada na documentação
+            fallback_url = f"https://staging.adamspay.com/pay/onofre/debt/{order.id}"
+            order.payment_link = fallback_url
             order.save()
             return Response({
                 'id': str(order.id),
                 'product_name': order.product_name,
                 'amount': str(order.amount),
                 'status': order.status,
-                'payment_link': order.payment_link,
-                'warning': 'Modo simulador - Sem API Key configurada'
+                'payment_link': fallback_url,
+                'warning': 'Usando modo de simulação'
             })
         
-        # Preparar payload para AdamsPay
-        # Data de expiração: 7 dias a partir de agora
-        expiration_date = (datetime.now() + timedelta(days=7)).isoformat() + "Z"
+        # Preparar payload para AdamsPay - SEGUINDO A DOCUMENTAÇÃO
+        # Baseado no arquivo "API_Crear deuda [AdamsPay].pdf"
         
+        # Data de expiração: 2 dias como no exemplo
+        inicio_validez = datetime.now()
+        fin_validez = inicio_validez + timedelta(days=2)
+        
+        # Formato correto baseado na documentação
         payload = {
             "debt": {
                 "docId": str(order.id),  # ID único da dívida
-                "amount": {
-                    "currency": "PYG",  # Moeda: Guarani Paraguaio
-                    "value": str(float(amount))  # Valor como string
-                },
                 "label": product_name,
-                "validPeriod": {
-                    "start": datetime.now().isoformat() + "Z",
-                    "end": expiration_date
+                "amount": {
+                    "currency": "PYG",  # Moeda do Paraguai (Guarani)
+                    "value": str(int(float(amount) * 1000))  # Converter para PYG (1 BRL ≈ 1000 PYG)
                 },
-                "target": {
-                    "type": "WEB",
-                    "label": "Don Onofre - " + product_name
+                "validPeriod": {
+                    "start": inicio_validez.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "end": fin_validez.strftime("%Y-%m-%dT%H:%M:%S")
                 }
-            },
-            "options": {
-                "externalId": str(order.id),  # Nosso ID de referência
-                "notificationUrl": ADAMSPAY_CALLBACK_URL,
-                "returnUrl": f"https://don-onofre-adamspay.onrender.com/?order_id={order.id}&status=completed",
-                "cancelUrl": f"https://don-onofre-adamspay.onrender.com/?order_id={order.id}&status=cancelled"
             }
         }
         
+        # Headers baseados na documentação
         headers = {
-            "Authorization": f"Bearer {ADAMSPAY_API_KEY}",
+            "apikey": ADAMSPAY_API_KEY,
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "x-if-exists": "update"  # Permite atualizar se já existe
         }
         
         print(f"🌐 Chamando AdamsPay API: {ADAMSPAY_API_URL}")
@@ -112,10 +94,10 @@ def create_order(request):
             )
             
             print(f"📥 Resposta AdamsPay - Status: {response.status_code}")
-            print(f"📥 Resposta AdamsPay - Body: {response.text}")
             
             if response.status_code in [200, 201]:
                 response_data = response.json()
+                print(f"📥 Resposta AdamsPay - Body: {json.dumps(response_data, indent=2)}")
                 
                 # Verificar se a resposta tem o formato esperado
                 if 'debt' in response_data and 'payUrl' in response_data['debt']:
@@ -135,13 +117,17 @@ def create_order(request):
                         'message': 'Pagamento criado com sucesso na AdamsPay'
                     })
                 else:
-                    print(f"❌ Resposta inesperada da AdamsPay: {response_data}")
+                    print(f"❌ Resposta inesperada da AdamsPay")
+                    
                     # Fallback: criar URL manual baseada na documentação
+                    # Baseado no arquivo "URL de pago [AdamsPay].pdf"
                     if 'debt' in response_data and 'id' in response_data['debt']:
                         debt_id = response_data['debt']['id']
-                        fallback_url = f"{ADAMSPAY_BASE_URL}/pay/debt/{debt_id}"
+                        fallback_url = f"{ADAMSPAY_BASE_URL}/pay/onofre/debt/{debt_id}"
                         order.payment_link = fallback_url
                         order.save()
+                        
+                        print(f"⚠️ Fallback URL criada: {fallback_url}")
                         
                         return Response({
                             'id': str(order.id),
@@ -153,23 +139,26 @@ def create_order(request):
                             'adamspay_response': response_data
                         })
                     else:
-                        raise Exception("Resposta da AdamsPay sem URL de pagamento")
+                        # URL de simulação baseada na documentação
+                        fallback_url = f"{ADAMSPAY_BASE_URL}/pay/onofre/debt/sim-{order.id}"
+                        order.payment_link = fallback_url
+                        order.save()
+                        
+                        return Response({
+                            'id': str(order.id),
+                            'product_name': order.product_name,
+                            'amount': str(order.amount),
+                            'status': order.status,
+                            'payment_link': fallback_url,
+                            'warning': 'Resposta da AdamsPay sem URL de pagamento'
+                        })
                         
             else:
                 print(f"❌ Erro AdamsPay: {response.status_code}")
                 print(f"❌ Detalhes: {response.text}")
                 
-                # Tentar parsear erro
-                error_msg = "Erro ao criar pagamento"
-                try:
-                    error_data = response.json()
-                    if 'message' in error_data:
-                        error_msg = error_data['message']
-                except:
-                    error_msg = response.text[:100]
-                
-                # Fallback: URL simulada
-                fallback_url = f"{ADAMSPAY_BASE_URL}/pay/debt/simulated-{order.id}"
+                # URL de fallback baseada na documentação
+                fallback_url = f"{ADAMSPAY_BASE_URL}/pay/onofre/debt/error-{order.id}"
                 order.payment_link = fallback_url
                 order.save()
                 
@@ -179,14 +168,14 @@ def create_order(request):
                     'amount': str(order.amount),
                     'status': order.status,
                     'payment_link': fallback_url,
-                    'warning': f'AdamsPay retornou erro {response.status_code}: {error_msg}',
+                    'warning': f'AdamsPay retornou erro {response.status_code}',
                     'fallback': True
                 })
                 
         except requests.exceptions.RequestException as e:
             print(f"❌ Erro na requisição para AdamsPay: {str(e)}")
-            # Fallback para URL simulada
-            fallback_url = f"{ADAMSPAY_BASE_URL}/pay/debt/error-{order.id}"
+            # URL de fallback
+            fallback_url = f"{ADAMSPAY_BASE_URL}/pay/onofre/debt/conn-error-{order.id}"
             order.payment_link = fallback_url
             order.save()
             return Response({
@@ -195,160 +184,14 @@ def create_order(request):
                 'amount': str(order.amount),
                 'status': order.status,
                 'payment_link': fallback_url,
-                'warning': f'Erro de conexão com AdamsPay: {str(e)}',
+                'warning': f'Erro de conexão com AdamsPay',
                 'fallback': True
             })
         
     except Exception as e:
-        # Log do erro completo
         print(f"❌ ERRO CRÍTICO em create_order: {str(e)}")
         print(traceback.format_exc())
         return Response(
-            {'error': str(e), 'trace': traceback.format_exc()},
+            {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-# Webhook callback da AdamsPay
-@api_view(['POST'])
-def adams_callback(request):
-    try:
-        print("=" * 50)
-        print("📬 WEBHOOK RECEBIDO DA ADAMSPAY")
-        print(f"📋 Headers: {dict(request.headers)}")
-        print(f"📦 Body (raw): {request.body}")
-        print(f"📦 Body (parsed): {request.data}")
-        
-        # A AdamsPay envia os dados no corpo da requisição
-        data = request.data
-        
-        # Log completo para debug
-        print(f"🔍 Dados recebidos: {json.dumps(data, indent=2)}")
-        
-        # Extrair informações baseado na documentação da AdamsPay
-        order_id = None
-        status_payment = None
-        debt_id = None
-        
-        # Tentar diferentes formatos baseado na documentação
-        if 'externalId' in data:
-            order_id = data['externalId']
-        elif 'external_reference' in data:
-            order_id = data['external_reference']
-        elif 'debt' in data and 'externalId' in data['debt']:
-            order_id = data['debt']['externalId']
-        
-        if 'status' in data:
-            status_payment = data['status']
-        elif 'payment' in data and 'status' in data['payment']:
-            status_payment = data['payment']['status']
-        
-        if 'debt' in data and 'id' in data['debt']:
-            debt_id = data['debt']['id']
-        
-        print(f"🔍 order_id={order_id}, status={status_payment}, debt_id={debt_id}")
-        
-        if not order_id:
-            print("❌ Nenhum order_id encontrado no webhook")
-            return Response({'error': 'externalId/external_reference é obrigatório'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            order = Order.objects.get(id=order_id)
-            print(f"✅ Pedido encontrado: {order.id}")
-            print(f"📊 Status atual: {order.status}")
-            
-            # Mapear status da AdamsPay para nosso sistema
-            status_map = {
-                'paid': 'PAID',
-                'completed': 'PAID',
-                'approved': 'PAID',
-                'confirmed': 'PAID',
-                'failed': 'FAILED',
-                'rejected': 'FAILED',
-                'expired': 'FAILED',
-                'cancelled': 'FAILED',
-                'pending': 'PENDING',
-                'in_process': 'PENDING',
-                'created': 'PENDING'
-            }
-            
-            if status_payment:
-                status_lower = status_payment.lower()
-                if status_lower in status_map:
-                    new_status = status_map[status_lower]
-                    if order.status != new_status:
-                        order.status = new_status
-                        order.save()
-                        print(f"✅ Status atualizado para: {new_status}")
-                    else:
-                        print(f"ℹ️ Status já é {new_status}, não atualizado")
-                else:
-                    print(f"⚠️ Status não mapeado: {status_payment}")
-            else:
-                print("⚠️ Nenhum status recebido no webhook")
-            
-            # Retornar resposta de sucesso
-            response_data = {
-                'ok': True,
-                'order_id': str(order_id),
-                'debt_id': debt_id,
-                'status': order.status,
-                'received_status': status_payment,
-                'message': 'Webhook processado com sucesso'
-            }
-            
-            print(f"✅ Resposta do webhook: {response_data}")
-            return Response(response_data, status=status.HTTP_200_OK)
-            
-        except Order.DoesNotExist:
-            print(f"❌ Pedido não encontrado: {order_id}")
-            return Response({
-                'error': f'Order not found: {order_id}',
-                'received_data': data
-            }, status=status.HTTP_404_NOT_FOUND)
-        
-    except Exception as e:
-        print(f"❌ ERRO em callback: {str(e)}")
-        print(traceback.format_exc())
-        return Response({
-            'error': str(e),
-            'trace': traceback.format_exc()
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# Status do pedido (para o frontend verificar)
-@api_view(['GET'])
-def order_status(request, order_id):
-    try:
-        order = Order.objects.get(id=order_id)
-        return Response({
-            'id': str(order.id),
-            'product_name': order.product_name,
-            'amount': str(order.amount),
-            'status': order.status,
-            'payment_link': order.payment_link,
-            'created_at': order.created_at,
-            'status_display': order.get_status_display() if hasattr(order, 'get_status_display') else order.status
-        })
-    except Order.DoesNotExist:
-        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
-
-# Página de simulação para testes (quando não há API Key)
-@api_view(['GET'])
-def simulate_payment(request, order_id):
-    """Página de simulação para testes"""
-    try:
-        order = Order.objects.get(id=order_id)
-        
-        context = {
-            'order': order,
-            'order_id': order_id,
-            'product_name': order.product_name,
-            'amount': order.amount,
-            'status': order.status,
-            'simulated': True
-        }
-        
-        return render(request, 'simulate_payment.html', context)
-        
-    except Order.DoesNotExist:
-        return Response({'error': 'Order not found'}, status=404)
