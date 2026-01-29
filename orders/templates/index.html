@@ -801,6 +801,40 @@
         let currentOrderId = null;
         let cartItems = [];
         
+        // Función para formatear precios al estilo paraguayo (punto como separador decimal)
+        function formatPricePY(price) {
+            // Si el precio ya es un string con formato, extraer el número
+            if (typeof price === 'string') {
+                // Extraer solo los números (eliminar símbolos y letras)
+                const numStr = price.replace(/[^\d.]/g, '');
+                price = parseFloat(numStr);
+            }
+            
+            // Convertir a número si es string
+            const numValue = typeof price === 'number' ? price : parseFloat(price);
+            
+            // Asegurar que tenga 3 decimales
+            const withThreeDecimals = numValue.toFixed(3);
+            
+            // Separar parte entera y decimal
+            const [integerPart, decimalPart] = withThreeDecimals.split('.');
+            
+            // Formatear parte entera con puntos de miles
+            let formattedInteger = '';
+            const integerStr = integerPart.toString();
+            const len = integerStr.length;
+            
+            for (let i = 0; i < len; i++) {
+                const digit = integerStr[len - 1 - i];
+                formattedInteger = digit + formattedInteger;
+                if ((i + 1) % 3 === 0 && i !== len - 1) {
+                    formattedInteger = '.' + formattedInteger;
+                }
+            }
+            
+            return `${formattedInteger}.${decimalPart}`;
+        }
+        
         // Función para filtrar productos
         function filterProducts(category) {
             const products = document.querySelectorAll('.product-card');
@@ -843,10 +877,14 @@
             const orderIdElement = document.getElementById('order-id');
             const orderActions = document.getElementById('order-actions');
             
+            // Formatear el precio para mostrar
+            const precioFormateado = formatPricePY(monto);
+            
             // Agregar al carrito
             cartItems.push({
                 name: nombreProducto,
                 price: monto,
+                priceFormatted: `₲ ${precioFormateado}`,
                 timestamp: new Date().toISOString()
             });
             updateCartSummary();
@@ -1065,21 +1103,22 @@
                     
                     // Mostrar alerta detallada
                     setTimeout(() => {
-                        const productPrice = datos.amount ? `₲ ${parseInt(datos.amount).toLocaleString('es-PY')}` : 'N/A';
+                        // Formatear el precio para la alerta
+                        const productPrice = datos.amount ? `₲ ${formatPricePY(datos.amount)}` : 'N/A';
                         alert(`🏪 **Mercado Don Onofre**\n\n` +
-                              `📦 **Pedido #${idPedido}**\n` +
-                              `🍽️ **Producto:** ${datos.product_name || 'N/A'}\n` +
-                              `💰 **Total:** ${productPrice}\n` +
-                              `📊 **Estado:** ${statusMessage}\n` +
-                              `📅 **Fecha:** ${new Date(datos.created_at).toLocaleString('es-PY')}\n\n` +
-                              `💡 **Información:** ${additionalInfo}\n\n` +
-                              `📞 **Contacto:** (021) 123-456`);
+                            `📦 **Pedido #${idPedido}**\n` +
+                            `🍽️ **Producto:** ${datos.product_name || 'N/A'}\n` +
+                            `💰 **Total:** ${productPrice}\n` +
+                            `📊 **Estado:** ${statusMessage}\n` +
+                            `📅 **Fecha:** ${new Date(datos.created_at).toLocaleString('es-PY')}\n\n` +
+                            `💡 **Información:** ${additionalInfo}\n\n` +
+                            `📞 **Contacto:** (021) 123-456`);
                     }, 300);
                 })
                 .catch(error => {
                     console.error('Error al verificar estado:', error);
                     statusText.innerHTML = previousText;
-                    alert('❌ Error al verificar el estado del pedido. Por favor, intenta nuevamente o contacta a nuestro servicio al cliente.');
+                    alert('Error al verificar el estado del pedido. Por favor, intenta nuevamente o contacta a nuestro servicio al cliente.');
                 });
         }
         
@@ -1092,8 +1131,12 @@
             if (cartItems.length > 0) {
                 cartSummary.style.display = 'flex';
                 
+                // Calcular total
+                const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+                const totalFormatted = formatPricePY(total);
+                
                 // Mostrar tooltip con resumen
-                cartSummary.title = `Productos en carrito:\n${cartItems.map(item => `• ${item.name} - ₲ ${item.price.toLocaleString('es-PY')}`).join('\n')}`;
+                cartSummary.title = `Productos en carrito:\n${cartItems.map(item => `• ${item.name} - ₲ ${formatPricePY(item.price)}`).join('\n')}\n\n💰 Total: ₲ ${totalFormatted}`;
             }
         }
         
@@ -1112,26 +1155,54 @@
                 }, index * 100);
             });
             
-            // Formatear todos los precios
+            // Formatear todos los precios en la página
             document.querySelectorAll('.product-price').forEach(priceElement => {
-                const priceText = priceElement.textContent;
-                const numbers = priceText.match(/\d+/g);
-                if (numbers) {
-                    numbers.forEach(num => {
-                        const formatted = parseInt(num).toLocaleString('es-PY');
-                        priceElement.innerHTML = priceElement.innerHTML.replace(num, formatted);
-                    });
+                const originalHTML = priceElement.innerHTML;
+                
+                // Buscar patrones de precios (₲ seguido de número)
+                const priceRegex = /₲\s*([\d,.]+)/g;
+                let nuevoHTML = originalHTML;
+                
+                let match;
+                while ((match = priceRegex.exec(originalHTML)) !== null) {
+                    const precioOriginal = match[1];
+                    const precioFormateado = formatPricePY(precioOriginal);
+                    nuevoHTML = nuevoHTML.replace(precioOriginal, precioFormateado);
                 }
+                
+                priceElement.innerHTML = nuevoHTML;
+            });
+            
+            // También formatear precios tachados (old-price)
+            document.querySelectorAll('.old-price').forEach(priceElement => {
+                const originalHTML = priceElement.innerHTML;
+                
+                // Buscar números
+                const priceRegex = /([\d,.]+)/g;
+                let nuevoHTML = originalHTML;
+                
+                let match;
+                while ((match = priceRegex.exec(originalHTML)) !== null) {
+                    const precioOriginal = match[1];
+                    const precioFormateado = formatPricePY(precioOriginal);
+                    nuevoHTML = nuevoHTML.replace(precioOriginal, precioFormateado);
+                }
+                
+                priceElement.innerHTML = nuevoHTML;
             });
             
             // Configurar el carrito
             const cartSummary = document.getElementById('cart-summary');
             cartSummary.addEventListener('click', () => {
                 if (cartItems.length > 0) {
+                    // Calcular total
+                    const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+                    const totalFormatted = formatPricePY(total);
+                    
                     alert(`🛒 **Tu Carrito de Compras**\n\n` +
-                          `${cartItems.map((item, index) => `${index + 1}. ${item.name} - ₲ ${item.price.toLocaleString('es-PY')}`).join('\n')}\n\n` +
-                          `💰 **Total:** ₲ ${cartItems.reduce((sum, item) => sum + item.price, 0).toLocaleString('es-PY')}\n\n` +
-                          `*Los productos se procesan individualmente para mejor control de inventario.`);
+                        `${cartItems.map((item, index) => `${index + 1}. ${item.name} - ₲ ${formatPricePY(item.price)}`).join('\n')}\n\n` +
+                        `💰 **Total:** ₲ ${totalFormatted}\n\n` +
+                        `*Los productos se procesan individualmente para mejor control de inventario.`);
                 }
             });
         });

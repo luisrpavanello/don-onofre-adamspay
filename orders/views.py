@@ -50,11 +50,11 @@ def create_order(request):
             status='PENDING'
         )
         
-        print(f"✅ Pedido creado: {order.id}")
+        print(f"Pedido creado: {order.id}")
         
         # Si no tiene API Key, usar modo simulación
         if not ADAMSPAY_API_KEY or ADAMSPAY_API_KEY == 'su_api_key_aqui':
-            print("⚠️ MODO SIMULACIÓN - Configure una API Key real")
+            print("MODO SIMULACIÓN - Configure una API Key real")
             
             # URL en el formato correcto: /pay/{app_slug}/debt/{debt_id}
             payment_url = f"{ADAMSPAY_BASE_URL}/pay/{ADAMSPAY_APP_SLUG}/debt/{order.id}"
@@ -106,8 +106,8 @@ def create_order(request):
             "x-if-exists": "update"
         }
         
-        print(f"🌐 Llamando a AdamsPay: {ADAMSPAY_API_URL}")
-        print(f"📤 Payload: {json.dumps(payload, indent=2)}")
+        print(f"Llamando a AdamsPay: {ADAMSPAY_API_URL}")
+        print(f"Payload: {json.dumps(payload, indent=2)}")
         
         # Hacer la solicitud
         response = requests.post(
@@ -117,11 +117,11 @@ def create_order(request):
             timeout=30
         )
         
-        print(f"📥 Estado: {response.status_code}")
+        print(f"Estado: {response.status_code}")
         
         if response.status_code in [200, 201]:
             data = response.json()
-            print(f"✅ Respuesta: {json.dumps(data, indent=2)}")
+            print(f"Respuesta: {json.dumps(data, indent=2)}")
             
             if 'debt' in data and 'payUrl' in data['debt']:
                 payment_url = data['debt']['payUrl']
@@ -139,7 +139,7 @@ def create_order(request):
                 })
         
         # Si llegó aquí, hubo error
-        print(f"❌ Error: {response.text}")
+        print(f"Error: {response.text}")
         
         # Fallback: URL simulada
         payment_url = f"{ADAMSPAY_BASE_URL}/pay/{ADAMSPAY_APP_SLUG}/debt/{order.id}"
@@ -156,7 +156,7 @@ def create_order(request):
         })
         
     except Exception as e:
-        print(f"❌ ERROR: {str(e)}")
+        print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
         return Response(
             {'error': str(e)},
@@ -169,8 +169,8 @@ def adams_callback(request):
     """Webhook para recibir notificaciones de AdamsPay"""
     try:
         print("=" * 50)
-        print("📬 WEBHOOK ADAMSPAY")
-        print(f"📦 Datos: {request.data}")
+        print("WEBHOOK ADAMSPAY")
+        print(f"Datos: {request.data}")
         
         # VALIDAR HMAC (secreto)
         if ADAMSPAY_APP_SECRET:
@@ -195,7 +195,7 @@ def adams_callback(request):
         # Buscar pedido
         try:
             order = Order.objects.get(id=order_id)
-            print(f"✅ Pedido encontrado: {order.id}")
+            print(f"Pedido encontrado: {order.id}")
             
             # Actualizar estado
             status_map = {
@@ -212,7 +212,7 @@ def adams_callback(request):
                 if order.status != new_status:
                     order.status = new_status
                     order.save()
-                    print(f"✅ Estado actualizado a: {new_status}")
+                    print(f"Estado actualizado a: {new_status}")
             
             # Respuesta de éxito
             return Response({
@@ -222,11 +222,11 @@ def adams_callback(request):
             }, status=200)
             
         except Order.DoesNotExist:
-            print(f"❌ Pedido no existe: {order_id}")
+            print(f"Pedido no existe: {order_id}")
             return Response({'error': 'Pedido no encontrado'}, status=404)
             
     except Exception as e:
-        print(f"❌ ERROR webhook: {str(e)}")
+        print(f"ERROR webhook: {str(e)}")
         return Response({'error': str(e)}, status=500)
 
 # ============= OTRAS VIEWS =============
