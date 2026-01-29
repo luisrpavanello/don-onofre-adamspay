@@ -82,22 +82,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dononofre.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# Configuração SIMPLES e DIRETA
+print("=== CONFIGURAÇÃO DO BANCO DE DADOS ===")
+print(f"RENDER environment variable: {os.getenv('RENDER')}")
+print(f"DATABASE_URL environment variable: {os.getenv('DATABASE_URL')}")
 
-# Configuração do banco de dados - priorizando PostgreSQL do Render
-DATABASE_URL = os.getenv('DATABASE_URL', None)
-
-if DATABASE_URL:
-    # Usar PostgreSQL do Render
+# SEMPRE usar PostgreSQL quando DATABASE_URL estiver definida
+if os.getenv('DATABASE_URL'):
+    print("=== USANDO POSTGRESQL (DATABASE_URL detectada) ===")
     DATABASES = {
         'default': dj_database_url.config(
-            default=DATABASE_URL,
+            default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
+    # Forçar engine PostgreSQL
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+    print(f"Database ENGINE: {DATABASES['default']['ENGINE']}")
+    print(f"Database HOST: {DATABASES['default'].get('HOST', 'N/A')}")
 else:
     # Localmente - usar SQLite
+    print("=== USANDO SQLITE (ambiente local) ===")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -131,3 +137,18 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Adicionar esta linha para logs no Render
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
