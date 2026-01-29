@@ -3,7 +3,12 @@ services:
     name: don-onofre-adamspay
     env: python
     buildCommand: ./build.sh
-    startCommand: ./startup.sh
+    startCommand: |
+      echo "=== EXECUTANDO STARTUP SCRIPT ===" &&
+      python manage.py makemigrations --noinput &&
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      gunicorn dononofre.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         value: postgresql://dononofredb_user:ZWZ2GNPDnJRkN607xUINJ2jPL4drwXZW@dpg-d5t7p8chg0os73a4idq0-a/dononofredb
@@ -15,7 +20,3 @@ services:
         value: false
       - key: PORT
         value: 10000
-    disk:
-      name: data
-      mountPath: /opt/render/project/data
-      sizeGB: 1
