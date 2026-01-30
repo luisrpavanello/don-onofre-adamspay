@@ -506,7 +506,7 @@
             
             ordersEmpty.style.display = 'none';
             
-            // Ordenar por fecha (más reciente primero)
+            // Ordenar por fecha
             const sortedOrders = [...ordersHistory].sort((a, b) => 
                 new Date(b.created_at) - new Date(a.created_at)
             );
@@ -548,7 +548,7 @@
                 if (order.status === 'PENDING') {
                     actionButtons = `
                         <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
-                            <i class="fas fa-eye"></i> Ver
+                            <i class="fas fa-sync-alt"></i> Actualizar
                         </button>
                         ${order.payment_link ? `
                         <button class="action-btn pay-btn" onclick="window.open('${order.payment_link}', '_blank')">
@@ -559,7 +559,7 @@
                 } else if (order.status === 'FAILED') {
                     actionButtons = `
                         <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
-                            <i class="fas fa-eye"></i> Ver
+                            <i class="fas fa-sync-alt"></i> Actualizar
                         </button>
                         <button class="action-btn retry-btn" onclick="retryOrder('${order.id}')">
                             <i class="fas fa-redo"></i> Reintentar
@@ -568,7 +568,7 @@
                 } else {
                     actionButtons = `
                         <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
-                            <i class="fas fa-eye"></i> Ver
+                            <i class="fas fa-sync-alt"></i> Actualizar
                         </button>
                     `;
                 }
@@ -642,17 +642,11 @@
             const precioFormateado = formatPricePY(order.amount);
             
             // Mostrar cargando
-            alert(`**Mercado Don Onofre**\n\n
-                **CONSULTANDO ESTADO DEL PEDIDO**\n
-                ──────────────────────\n
-                **ID:** ${order.id}\n
-                **Producto:** ${order.product_name}\n
-                **Monto:** ₲ ${precioFormateado}\n
-                **Fecha:** ${fechaFormateada}\n\n
+            alert(`
                 Consultando estado actual con el servidor...
                 `);
             
-            // Consultar estado actual a través de la API (igual que verificarEstadoPedido)
+            // Consultar estado actual a través de la API
             fetch(`/api/orders/${orderId}/`)
                 .then(response => response.json())
                 .then(datos => {
@@ -662,7 +656,6 @@
                     const estadoRespuesta = datos.status ? datos.status.toLowerCase() : 'pending';
                     
                     switch(estadoRespuesta) {
-                        case 'pending':
                         case 'pending':
                             estadoColor = '#8B4513';
                             estadoIcono = '⏱️';
@@ -688,7 +681,7 @@
                             informacionAdicional = 'No pudimos determinar el estado del pedido. Contacta a nuestro servicio al cliente.';
                     }
                     
-                    // Actualizar el pedido en el historial local
+                    // Orden de actualización en la historia local.
                     const orderIndex = ordersHistory.findIndex(o => o.id === orderId);
                     if (orderIndex !== -1) {
                         ordersHistory[orderIndex].status = estadoRespuesta.toUpperCase();
@@ -696,38 +689,38 @@
                         saveOrdersToLocalStorage();
                     }
                     
-                    // Mostrar alerta detallada con el estado actualizado
+                    loadOrdersHistory();
+                    
+                    // Mostrar alerta detallada com el estado atualizado
                     const estadoActual = estadoRespuesta.toUpperCase();
-                    const detalles = `
-                    **Mercado Don Onofre**\n\n
-                    **DETALLES DEL PEDIDO**\n
-                    ──────────────────────\n
-                    **ID:** ${order.id}\n
-                    **Producto:** ${order.product_name}\n
-                    **Monto:** ₲ ${precioFormateado}\n
-                    **Estado:** ${estadoIcono} ${estadoMensaje}\n
-                    **Estado técnico:** ${estadoActual}\n
-                    **Fecha:** ${fechaFormateada}\n
-                    **Enlace de pago:** ${datos.payment_link || order.payment_link || 'No disponible'}\n\n
-                    ──────────────────────\n
-                    **Información:** ${informacionAdicional}\n\n
-                    **Acciones disponibles:**\n
-                    ${estadoActual === 'PENDING' && (datos.payment_link || order.payment_link) ? 
-                    `• COMPLETAR EL PAGO: ${datos.payment_link || order.payment_link}\n` : ''}
-                    ${estadoActual === 'FAILED' ? '• REINTENTAR LA COMPRA\n' : ''}
-                    • VERIFICAR ESTADO NUEVAMENTE (recarga la página)\n
-                    • CONTACTAR SOPORTE\n\n
-                    📞 **Soporte:** (021) 123-456\n
-                    🕒 **Horario:** Lun-Sáb 8:00-20:00
-                    `;
                     
-                    alert(detalles);
+                    // Preparar mensaje para o alerta
+                    let alertMessage = `**Mercado Don Onofre**\n\n
+                        **ESTADO ACTUALIZADO DEL PEDIDO**\n
+                        ──────────────────────\n
+                        **ID:** ${order.id}\n
+                        **Producto:** ${order.product_name}\n
+                        **Monto:** ₲ ${precioFormateado}\n
+                        **Fecha:** ${fechaFormateada}\n
+                        **Nuevo estado:** ${estadoMensaje}\n\n
+                        ${informacionAdicional}\n\n
+                        ──────────────────────\n
+                        **Acciones disponibles:**`;
                     
-                    // Si hay enlace de pago y el estado está pendiente, ofrecer abrirlo
+                    // Se há enlace de pago e o estado está pendente, oferecer abri-lo
                     if (estadoActual === 'PENDING' && (datos.payment_link || order.payment_link)) {
-                        if (confirm('¿Deseas proceder al pago ahora?')) {
-                            window.open(datos.payment_link || order.payment_link, '_blank');
-                        }
+                        alertMessage += `\n• **Proceder al pago** (se abrirá en nueva ventana)`;
+                        
+                        // Mostrar alerta con opção de pagamento
+                        setTimeout(() => {
+                            if (confirm(alertMessage + "\n\n¿Deseas proceder al pago ahora?")) {
+                                window.open(datos.payment_link || order.payment_link, '_blank');
+                            }
+                        }, 100);
+                    } else {
+                        setTimeout(() => {
+                            alert(alertMessage);
+                        }, 100);
                     }
                 })
                 .catch(error => {
@@ -1018,11 +1011,16 @@
                         </span>
                     `;
                     
-                    // Actualizar historial local
+                    // Atualizar histórico local
                     const orderIndex = ordersHistory.findIndex(o => o.id === idPedido);
                     if (orderIndex !== -1) {
                         ordersHistory[orderIndex].status = datos.status.toUpperCase();
                         saveOrdersToLocalStorage();
+                        
+                        // RECARREGAR O HISTÓRICO NA TELA (se estiver visível)
+                        if (document.getElementById('order-history').style.display === 'block') {
+                            loadOrdersHistory();
+                        }
                     }
                     
                     // Mostrar alerta detallada
