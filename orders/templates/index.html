@@ -641,17 +641,6 @@
             // Formatear precio
             const precioFormateado = formatPricePY(order.amount);
             
-            // Mostrar cargando
-            alert(`**Mercado Don Onofre**\n\n
-                **CONSULTANDO ESTADO DEL PEDIDO**\n
-                ──────────────────────\n
-                **ID:** ${order.id}\n
-                **Producto:** ${order.product_name}\n
-                **Monto:** ₲ ${precioFormateado}\n
-                **Fecha:** ${fechaFormateada}\n\n
-                Consultando estado actual con el servidor...
-                `);
-            
             // Consultar estado actual a través de la API
             fetch(`/api/orders/${orderId}/`)
                 .then(response => response.json())
