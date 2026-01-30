@@ -389,38 +389,31 @@
         let cartItems = [];
         let ordersHistory = [];
         
-        // Función para formatear precios al estilo paraguayo (punto como separador decimal)
+        // Función para formatear precios al estilo GS
         function formatPricePY(price) {
-            // Si el precio ya es un string con formato, extraer el número
+            // Si el precio ya es una cadena formateada, extraiga el número
             if (typeof price === 'string') {
-                // Extraer solo los números (eliminar símbolos y letras)
-                const numStr = price.replace(/[^\d.]/g, '');
+                const numStr = price.replace(/[^\d]/g, '');
                 price = parseFloat(numStr);
             }
             
-            // Convertir a número si es string
             const numValue = typeof price === 'number' ? price : parseFloat(price);
-            
-            // Asegurar que tenga 3 decimales
-            const withThreeDecimals = numValue.toFixed(3);
-            
-            // Separar parte entera y decimal
-            const [integerPart, decimalPart] = withThreeDecimals.split('.');
+            const integerValue = Math.round(numValue);
             
             // Formatear parte entera con puntos de miles
-            let formattedInteger = '';
-            const integerStr = integerPart.toString();
+            const integerStr = integerValue.toString();
+            let formattedPrice = '';
             const len = integerStr.length;
             
             for (let i = 0; i < len; i++) {
                 const digit = integerStr[len - 1 - i];
-                formattedInteger = digit + formattedInteger;
+                formattedPrice = digit + formattedPrice;
                 if ((i + 1) % 3 === 0 && i !== len - 1) {
-                    formattedInteger = '.' + formattedInteger;
+                    formattedPrice = '.' + formattedPrice;
                 }
             }
             
-            return `${formattedInteger}.${decimalPart}`;
+            return formattedPrice;
         }
         
         // Función para filtrar productos

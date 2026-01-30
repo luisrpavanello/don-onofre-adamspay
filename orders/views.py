@@ -245,6 +245,11 @@ def procesar_notificacion_adams(datos):
     """Procesa notificaciones de AdamsPay"""
     try:
         print("Procesando notificación AdamsPay")
+        print(f"Datos recibidos: {datos}")
+        
+        # Para debugging
+        import json
+        print(f"Datos como JSON: {json.dumps(datos) if isinstance(datos, dict) else datos}")
         
         # Extraer ID del pedido
         order_id = None
@@ -256,6 +261,8 @@ def procesar_notificacion_adams(datos):
                 order_id = datos['debt']['docId']
             elif 'id' in datos:
                 order_id = datos['id']
+            elif 'order_id' in datos:
+                order_id = datos['order_id']
         elif isinstance(datos, str):
             try:
                 datos_parseados = json.loads(datos)
@@ -266,81 +273,80 @@ def procesar_notificacion_adams(datos):
             except:
                 pass
         
+        print(f"ID extraído: {order_id}")
+        
         if not order_id:
             print("ID no encontrado en los datos")
             return Response({'error': 'ID no encontrado'}, status=400)
         
         try:
-            order = Order.objects.get(id=order_id)
-            print(f"Pedido encontrado: {order.id}")
-            print(f"Estado actual: {order.status}")
+            # Limpiar y validar UUID
+            try:
+                order_uuid = uuid.UUID(str(order_id))
+            except ValueError:
+                print(f"ID no es un UUID válido: {order_id}")
+                return Response({'error': 'UUID inválido'}, status=400)
             
-            # Mapeo de estados
-            mapa_estados = {
-                'paid': 'PAID',
-                'approved': 'PAID',
-                'completed': 'PAID',
-                'confirmed': 'PAID',
-                'failed': 'FAILED',
-                'rejected': 'FAILED',
-                'expired': 'FAILED',
-                'cancelled': 'FAILED',
-                'pending': 'PENDING'
-            }
+            order = Order.objects.get(id=order_uuid)
+            print(f"Pedido encontrado: {order.id}")
+            print(f"Estado actual del pedido: {order.status}")
             
             # Determinar nuevo estado
             nuevo_estado = 'PENDING'
-            if isinstance(datos, dict):
-                estado_datos = datos.get('status', '').lower()
-                if 'debt' in datos and 'payStatus' in datos['debt']:
-                    estado_datos = datos['debt']['payStatus'].get('status', '').lower()
-            else:
-                estado_datos = str(datos.get('status', '')).lower() if hasattr(datos, 'get') else ''
             
-            nuevo_estado = mapa_estados.get(estado_datos, 'PENDING')
+            # Mapeo de estados
+            if isinstance(datos, dict):
+                estado_datos = str(datos.get('status', '')).lower()
+                
+                # Verificar en diferentes ubicaciones posibles
+                if estado_datos in ['paid', 'approved', 'completed', 'confirmed']:
+                    nuevo_estado = 'PAID'
+                elif estado_datos in ['failed', 'rejected', 'expired', 'cancelled']:
+                    nuevo_estado = 'FAILED'
+                elif estado_datos == 'pending':
+                    nuevo_estado = 'PENDING'
+                
+                # También verificar en debt.payStatus.status
+                if 'debt' in datos and 'payStatus' in datos['debt']:
+                    pay_status = datos['debt']['payStatus'].get('status', '').lower()
+                    if pay_status in ['paid', 'approved']:
+                        nuevo_estado = 'PAID'
+                    elif pay_status in ['failed', 'rejected']:
+                        nuevo_estado = 'FAILED'
+            
+            print(f"Nuevo estado a asignar: {nuevo_estado}")
             
             # Actualizar si cambió
             if order.status != nuevo_estado:
                 order.status = nuevo_estado
                 order.save()
                 print(f"Estado actualizado a: {nuevo_estado}")
+                
+                # Log para auditoría
+                print(f"Auditoría - Pedido {order.id}: {order.status} -> {nuevo_estado}")
             else:
-                print(f"Estado ya era: {nuevo_estado}")
+                print(f"ℹEstado ya era: {nuevo_estado}")
             
             return Response({
                 'ok': True,
                 'order_id': str(order_id),
                 'status': order.status,
+                'previous_status': 'PENDING',  # Para comparación
                 'message': f'Estado actualizado a {order.status}'
             }, status=200)
             
         except Order.DoesNotExist:
-            print(f"Pedido no existe: {order_id}")
+            print(f"Pedido no existe en BD: {order_id}")
             
-            # Crear pedido automáticamente si parece un UUID (para pruebas)
-            if order_id and '-' in str(order_id):
-                try:
-                    order = Order.objects.create(
-                        id=order_id,
-                        product_name='Pago AdamsPay',
-                        amount=0,
-                        status='PAID' if 'paid' in str(datos).lower() else 'PENDING'
-                    )
-                    print(f"Pedido creado automáticamente: {order_id}")
-                    return Response({
-                        'ok': True,
-                        'order_id': str(order_id),
-                        'status': order.status,
-                        'message': 'Pedido creado automáticamente'
-                    }, status=200)
-                except:
-                    pass
+            # Listar todos los pedidos para debugging
+            all_orders = Order.objects.all()
+            print(f"Pedidos en BD: {[str(o.id) for o in all_orders]}")
             
             return Response({'error': 'Pedido no encontrado'}, status=404)
             
     except Exception as e:
         print(f"Error procesando notificación: {str(e)}")
-        print(traceback.format_exc())
+        print(f"Traceback: {traceback.format_exc()}")
         return Response({'error': str(e)}, status=500)
 
 # Página de resultado de pago
