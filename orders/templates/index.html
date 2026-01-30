@@ -622,7 +622,7 @@
             });
         }
         
-        // Función para ver detalles de un pedido
+        // Función para verificar status de un pedido
         function viewOrderDetail(orderId) {
             const order = ordersHistory.find(o => o.id === orderId);
             if (!order) return;
@@ -641,47 +641,116 @@
             // Formatear precio
             const precioFormateado = formatPricePY(order.amount);
             
-            // Determinar estado
-            let estadoTexto = 'Pendiente';
-            if (order.status === 'PAID') estadoTexto = 'Pagado';
-            if (order.status === 'FAILED') estadoTexto = 'Fallido';
+            // Mostrar cargando
+            alert(`**Mercado Don Onofre**\n\n
+                **CONSULTANDO ESTADO DEL PEDIDO**\n
+                ──────────────────────\n
+                **ID:** ${order.id}\n
+                **Producto:** ${order.product_name}\n
+                **Monto:** ₲ ${precioFormateado}\n
+                **Fecha:** ${fechaFormateada}\n\n
+                Consultando estado actual con el servidor...
+                `);
             
-            // Mostrar detalles en el modal/alerta
-            const detalles = `
-            **Mercado Don Onofre**\n\n
-            **DETALLES DEL PEDIDO**\n
-            ──────────────────────\n
-            **ID:** ${order.id}\n
-            **Producto:** ${order.product_name}\n
-            **Monto:** ₲ ${precioFormateado}\n
-            **Estado:** ${estadoTexto}\n
-            **Fecha:** ${fechaFormateada}\n
-            **Enlace de pago:** ${order.payment_link || 'No disponible'}\n\n
-            ──────────────────────\n
-            **Acciones disponibles:**\n
-            • Verificar estado actual\n
-            ${order.status === 'PENDING' && order.payment_link ? '• Completar el pago\n' : ''}
-            ${order.status === 'FAILED' ? '• Reintentar compra\n' : ''}
-            \n📞 **Soporte:** (021) 123-456
-            `;
-            
-            alert(detalles);
-        }
-        
-        // Función para reintentar un pedido fallido
-        function retryOrder(orderId) {
-            const order = ordersHistory.find(o => o.id === orderId);
-            if (!order) return;
-            
-            if (confirm(`¿Deseas reintentar la compra de "${order.product_name}" por ₲ ${formatPricePY(order.amount)}?`)) {
-                // Volver a la sección de productos
-                toggleOrdersHistory();
-                // Simular clic en el producto correspondiente (esto es simplificado)
-                // En una implementación real, deberías buscar y hacer scroll al producto
-                setTimeout(() => {
-                    comprarProducto(order.product_name, order.amount);
-                }, 500);
-            }
+            // Consultar estado actual a través de la API (igual que verificarEstadoPedido)
+            fetch(`/api/orders/${orderId}/`)
+                .then(response => response.json())
+                .then(datos => {
+                    let estadoColor, estadoIcono, estadoMensaje, informacionAdicional;
+                    
+                    // Determinar estado basado en la respuesta
+                    const estadoRespuesta = datos.status ? datos.status.toLowerCase() : 'pending';
+                    
+                    switch(estadoRespuesta) {
+                        case 'pending':
+                        case 'pending':
+                            estadoColor = '#8B4513';
+                            estadoIcono = '⏱️';
+                            estadoMensaje = 'PENDIENTE DE PAGO';
+                            informacionAdicional = 'El pago aún no ha sido completado. Por favor, procede al pago para confirmar tu pedido.';
+                            break;
+                        case 'paid':
+                            estadoColor = '#2E8B57';
+                            estadoIcono = '✅';
+                            estadoMensaje = '¡PAGO CONFIRMADO!';
+                            informacionAdicional = 'Tu pedido está siendo preparado para el envío. Te notificaremos cuando sea despachado.';
+                            break;
+                        case 'failed':
+                            estadoColor = '#8B0000';
+                            estadoIcono = '❌';
+                            estadoMensaje = 'PAGO FALLIDO';
+                            informacionAdicional = 'El pago no pudo ser procesado. Por favor, intenta nuevamente o contacta a nuestro servicio al cliente.';
+                            break;
+                        default:
+                            estadoColor = '#8B4513';
+                            estadoIcono = 'ℹ️';
+                            estadoMensaje = 'ESTADO DESCONOCIDO';
+                            informacionAdicional = 'No pudimos determinar el estado del pedido. Contacta a nuestro servicio al cliente.';
+                    }
+                    
+                    // Actualizar el pedido en el historial local
+                    const orderIndex = ordersHistory.findIndex(o => o.id === orderId);
+                    if (orderIndex !== -1) {
+                        ordersHistory[orderIndex].status = estadoRespuesta.toUpperCase();
+                        ordersHistory[orderIndex].payment_link = datos.payment_link || order.payment_link;
+                        saveOrdersToLocalStorage();
+                    }
+                    
+                    // Mostrar alerta detallada con el estado actualizado
+                    const estadoActual = estadoRespuesta.toUpperCase();
+                    const detalles = `
+                    **Mercado Don Onofre**\n\n
+                    **DETALLES DEL PEDIDO**\n
+                    ──────────────────────\n
+                    **ID:** ${order.id}\n
+                    **Producto:** ${order.product_name}\n
+                    **Monto:** ₲ ${precioFormateado}\n
+                    **Estado:** ${estadoIcono} ${estadoMensaje}\n
+                    **Estado técnico:** ${estadoActual}\n
+                    **Fecha:** ${fechaFormateada}\n
+                    **Enlace de pago:** ${datos.payment_link || order.payment_link || 'No disponible'}\n\n
+                    ──────────────────────\n
+                    **Información:** ${informacionAdicional}\n\n
+                    **Acciones disponibles:**\n
+                    ${estadoActual === 'PENDING' && (datos.payment_link || order.payment_link) ? 
+                    `• COMPLETAR EL PAGO: ${datos.payment_link || order.payment_link}\n` : ''}
+                    ${estadoActual === 'FAILED' ? '• REINTENTAR LA COMPRA\n' : ''}
+                    • VERIFICAR ESTADO NUEVAMENTE (recarga la página)\n
+                    • CONTACTAR SOPORTE\n\n
+                    📞 **Soporte:** (021) 123-456\n
+                    🕒 **Horario:** Lun-Sáb 8:00-20:00
+                    `;
+                    
+                    alert(detalles);
+                    
+                    // Si hay enlace de pago y el estado está pendiente, ofrecer abrirlo
+                    if (estadoActual === 'PENDING' && (datos.payment_link || order.payment_link)) {
+                        if (confirm('¿Deseas proceder al pago ahora?')) {
+                            window.open(datos.payment_link || order.payment_link, '_blank');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al consultar estado:', error);
+                    
+                    // Mostrar alerta con error
+                    alert(`**Mercado Don Onofre**\n\n
+                        **ERROR AL CONSULTAR ESTADO**\n
+                        ──────────────────────\n
+                        **ID:** ${order.id}\n
+                        **Producto:** ${order.product_name}\n
+                        **Monto:** ₲ ${precioFormateado}\n
+                        **Fecha:** ${fechaFormateada}\n
+                        **Último estado conocido:** ${order.status}\n\n
+                        ──────────────────────\n
+                        **Error:** ${error.message}\n\n
+                        **Sugerencias:**\n
+                        1. Verifica tu conexión a internet\n
+                        2. Intenta nuevamente en unos minutos\n
+                        3. Contacta a soporte si el problema persiste\n\n
+                        📞 **Soporte:** (021) 123-456
+                        `);
+                });
         }
         
         function comprarProducto(nombreProducto, monto) {
