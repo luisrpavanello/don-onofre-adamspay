@@ -642,7 +642,13 @@
             const precioFormateado = formatPricePY(order.amount);
             
             // Mostrar cargando
-            alert(`
+            alert(`**Mercado Don Onofre**\n\n
+                **CONSULTANDO ESTADO DEL PEDIDO**\n
+                ──────────────────────\n
+                **ID:** ${order.id}\n
+                **Producto:** ${order.product_name}\n
+                **Monto:** ₲ ${precioFormateado}\n
+                **Fecha:** ${fechaFormateada}\n\n
                 Consultando estado actual con el servidor...
                 `);
             
@@ -681,7 +687,7 @@
                             informacionAdicional = 'No pudimos determinar el estado del pedido. Contacta a nuestro servicio al cliente.';
                     }
                     
-                    // Orden de actualización en la historia local.
+                    // Atualizar o pedido no histórico local
                     const orderIndex = ordersHistory.findIndex(o => o.id === orderId);
                     if (orderIndex !== -1) {
                         ordersHistory[orderIndex].status = estadoRespuesta.toUpperCase();
@@ -689,38 +695,20 @@
                         saveOrdersToLocalStorage();
                     }
                     
+                    // RECARREGAR O HISTÓRICO NA TELA
                     loadOrdersHistory();
                     
-                    // Mostrar alerta detallada com el estado atualizado
+                    // Estado atualizado
                     const estadoActual = estadoRespuesta.toUpperCase();
-                    
-                    // Preparar mensaje para o alerta
-                    let alertMessage = `**Mercado Don Onofre**\n\n
-                        **ESTADO ACTUALIZADO DEL PEDIDO**\n
-                        ──────────────────────\n
-                        **ID:** ${order.id}\n
-                        **Producto:** ${order.product_name}\n
-                        **Monto:** ₲ ${precioFormateado}\n
-                        **Fecha:** ${fechaFormateada}\n
-                        **Nuevo estado:** ${estadoMensaje}\n\n
-                        ${informacionAdicional}\n\n
-                        ──────────────────────\n
-                        **Acciones disponibles:**`;
                     
                     // Se há enlace de pago e o estado está pendente, oferecer abri-lo
                     if (estadoActual === 'PENDING' && (datos.payment_link || order.payment_link)) {
-                        alertMessage += `\n• **Proceder al pago** (se abrirá en nueva ventana)`;
-                        
-                        // Mostrar alerta con opção de pagamento
-                        setTimeout(() => {
-                            if (confirm(alertMessage + "\n\n¿Deseas proceder al pago ahora?")) {
-                                window.open(datos.payment_link || order.payment_link, '_blank');
-                            }
-                        }, 100);
+                        if (confirm('Estado actualizado. ¿Deseas proceder al pago ahora?')) {
+                            window.open(datos.payment_link || order.payment_link, '_blank');
+                        }
                     } else {
-                        setTimeout(() => {
-                            alert(alertMessage);
-                        }, 100);
+                        // Mostrar mensaje breve de confirmação
+                        alert(`Estado actualizado a: ${estadoMensaje}`);
                     }
                 })
                 .catch(error => {
