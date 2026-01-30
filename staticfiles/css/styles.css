@@ -1,14 +1,12 @@
-/* static/css/styles.css */
-
 :root {
-    --primary: #8B4513; /* Marrón para mercado */
-    --secondary: #228B22; /* Verde para fresco/natural */
-    --accent: #D2691E; /* Naranja para ofertas */
-    --success: #2E8B57; /* Verde mar para éxito */
-    --light: #FFF8DC; /* Beige claro */
-    --dark: #654321; /* Marrón oscuro */
-    --gray: #A9A9A9;
-    --shadow: 0 10px 30px rgba(139, 69, 19, 0.1);
+    --primary: #1A365D;
+    --secondary: #4c4a7c;
+    --accent: #1babbe;
+    --success: #2e398b;
+    --light: #F8F9FA;
+    --dark: #2D3748;
+    --gray: #718096;
+    --shadow: 0 10px 30px rgba(26, 54, 93, 0.1);
     --radius: 12px;
     --transition: all 0.3s ease;
 }
@@ -21,7 +19,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
+    background: linear-gradient(135deg, #F8F9FA 0%, #EDF2F7 100%);
     color: var(--dark);
     line-height: 1.6;
     min-height: 100vh;
@@ -33,7 +31,6 @@ body {
     margin: 0 auto;
 }
 
-/* Header */
 .header {
     text-align: center;
     margin-bottom: 40px;
@@ -56,7 +53,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(139, 69, 19, 0.8);
+    background: rgba(26, 54, 93, 0.85);
 }
 
 .header > * {
@@ -93,7 +90,6 @@ body {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* Navigation */
 .categories {
     display: flex;
     justify-content: center;
@@ -123,7 +119,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Products Section */
 .section-title {
     font-size: 1.8rem;
     margin-bottom: 25px;
@@ -153,7 +148,7 @@ body {
 
 .product-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(139, 69, 19, 0.15);
+    box-shadow: 0 15px 35px rgba(26, 54, 93, 0.15);
 }
 
 .product-badge {
@@ -260,7 +255,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Order Result */
 .order-result {
     background: white;
     border-radius: var(--radius);
@@ -295,7 +289,7 @@ body {
 }
 
 .order-status {
-    background: #FFF8DC;
+    background: #F8F9FA;
     padding: 20px;
     border-radius: var(--radius);
     margin-bottom: 20px;
@@ -310,7 +304,7 @@ body {
 .order-id {
     font-size: 0.9rem;
     color: var(--gray);
-    background: #F5E6D3;
+    background: #EDF2F7;
     padding: 8px 15px;
     border-radius: 20px;
     display: inline-block;
@@ -356,10 +350,9 @@ body {
 }
 
 .status-btn:hover {
-    background: #B85C14;
+    background: #D45A3D;
 }
 
-/* Footer */
 .footer {
     text-align: center;
     margin-top: 50px;
@@ -386,7 +379,6 @@ body {
     color: var(--primary);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .products-grid {
         grid-template-columns: 1fr;
@@ -415,7 +407,6 @@ body {
     }
 }
 
-/* Special offer banner */
 .offer-banner {
     background: linear-gradient(90deg, var(--accent), var(--primary));
     color: white;
@@ -454,7 +445,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Order History Styles */
 .order-history {
     margin-top: 50px;
     padding: 30px;
@@ -469,7 +459,7 @@ body {
 }
 
 .order-row:hover {
-    background-color: #FFF8DC;
+    background-color: #F8F9FA;
 }
 
 .order-row td {
@@ -526,7 +516,7 @@ body {
 }
 
 .view-btn:hover {
-    background: #654321;
+    background: #142a4a;
 }
 
 .pay-btn {
@@ -544,5 +534,5 @@ body {
 }
 
 .retry-btn:hover {
-    background: #B85C14;
+    background: #D45A3D;
 }

@@ -1,15 +1,13 @@
-/* static/css/payment_result.css */
-
 :root {
-    --primary: #8B4513;
+    --primary: #1A365D;
     --success: #2E8B57;
     --danger: #8B0000;
-    --warning: #D2691E;
+    --warning: #1babbe;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
+    background: linear-gradient(135deg, #F8F9FA 0%, #EDF2F7 100%);
     margin: 0;
     padding: 20px;
     min-height: 100vh;
@@ -21,7 +19,7 @@ body {
 .result-container {
     background: white;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(139, 69, 19, 0.2);
+    box-shadow: 0 10px 30px rgba(26, 54, 93, 0.2);
     padding: 40px;
     max-width: 500px;
     width: 100%;
@@ -43,18 +41,20 @@ h1 {
 }
 
 .order-id {
-    background: #FFF8DC;
+    background: #F8F9FA;
     padding: 10px 15px;
     border-radius: 10px;
     font-family: monospace;
     margin: 20px 0;
     display: inline-block;
+    color: var(--primary);
 }
 
 .message {
     margin: 20px 0;
     font-size: 1.1rem;
     line-height: 1.5;
+    color: #2D3748;
 }
 
 .actions {
@@ -81,7 +81,7 @@ h1 {
 }
 
 .btn-primary:hover {
-    background: #654321;
+    background: #142a4a;
     transform: translateY(-3px);
 }
 
