@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado del Pago - Don Onofre</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8B4513;
+            --success: #2E8B57;
+            --danger: #8B0000;
+            --warning: #D2691E;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .success { color: var(--success); }
+        .pending { color: var(--warning); }
+        .failed { color: var(--danger); }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .order-id {
+            background: #FFF8DC;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        
+        .message {
+            margin: 20px 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #654321;
+            transform: translateY(-3px);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        {% if order %}
+            {% if order.status == 'PAID' %}
+                <div class="status-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1>¡Pago Completado!</h1>
+                <p class="message">
+                    Tu pedido <strong>{{ order.product_name }}</strong> ha sido pagado exitosamente.
+                </p>
+            {% elif order.status == 'FAILED' %}
+                <div class="status-icon failed">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h1>Pago Fallido</h1>
+                <p class="message">
+                    Lo sentimos, no pudimos procesar tu pago. Por favor, intenta nuevamente.
+                </p>
+            {% else %}
+                <div class="status-icon pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h1>Pago Pendiente</h1>
+                <p class="message">
+                    Tu pedido está pendiente de pago. Completa el proceso en AdamsPay.
+                </p>
+            {% endif %}
+            
+            <div class="order-id">
+                <i class="fas fa-receipt"></i>
+                ID: {{ order.id }}
+            </div>
+            
+            <div class="message">
+                <i class="fas fa-box"></i> Producto: {{ order.product_name }}<br>
+                <i class="fas fa-money-bill-wave"></i> Monto: ₲ {{ order.amount }}<br>
+                <i class="fas fa-calendar"></i> Fecha: {{ order.created_at|date:"d/m/Y H:i" }}
+            </div>
+            
+        {% else %}
+            <div class="status-icon failed">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>Pedido No Encontrado</h1>
+            <p class="message">{{ error|default:"El pedido solicitado no existe." }}</p>
+        {% endif %}
+        
+        <div class="actions">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </a>
+            {% if order %}
+                <a href="/orders/{{ order.id }}/" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt"></i> Ver Estado Actual
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
