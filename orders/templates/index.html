@@ -5,461 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Don Onofre - Mercado & Delicatessen</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #8B4513; /* Marrón para mercado */
-            --secondary: #228B22; /* Verde para fresco/natural */
-            --accent: #D2691E; /* Naranja para ofertas */
-            --success: #2E8B57; /* Verde mar para éxito */
-            --light: #FFF8DC; /* Beige claro */
-            --dark: #654321; /* Marrón oscuro */
-            --gray: #A9A9A9;
-            --shadow: 0 10px 30px rgba(139, 69, 19, 0.1);
-            --radius: 12px;
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
-            color: var(--dark);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            background-image: url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=1200');
-            background-size: cover;
-            background-position: center;
-            color: white;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(139, 69, 19, 0.8);
-        }
-
-        .header > * {
-            position: relative;
-            z-index: 2;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .logo-icon {
-            font-size: 2.5rem;
-            color: var(--light);
-        }
-
-        .title {
-            font-size: 2.8rem;
-            color: white;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-family: 'Georgia', serif;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--light);
-            max-width: 600px;
-            margin: 0 auto;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* Navigation */
-        .categories {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .category-btn {
-            padding: 12px 25px;
-            border: 2px solid var(--secondary);
-            background: white;
-            color: var(--secondary);
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .category-btn.active,
-        .category-btn:hover {
-            background: var(--secondary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Products Section */
-        .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: var(--primary);
-            position: relative;
-            padding-bottom: 10px;
-            border-bottom: 3px solid var(--accent);
-            display: inline-block;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            border: 1px solid #E6D5B8;
-        }
-
-        .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(139, 69, 19, 0.15);
-        }
-
-        .product-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--accent);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            z-index: 2;
-        }
-
-        .product-badge.organic { background: var(--secondary); }
-        .product-badge.new { background: #3498db; }
-        .product-badge.limited { background: #9B59B6; }
-
-        .product-image {
-            height: 200px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 4rem;
-        }
-
-        .product-content {
-            padding: 25px;
-        }
-
-        .product-name {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .product-description {
-            color: var(--gray);
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-            min-height: 60px;
-        }
-
-        .product-features {
-            margin: 15px 0;
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            color: var(--dark);
-        }
-
-        .feature i {
-            color: var(--success);
-            width: 16px;
-        }
-
-        .product-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-
-        .product-price {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .product-price .old-price {
-            font-size: 1rem;
-            color: var(--gray);
-            text-decoration: line-through;
-            margin-right: 5px;
-        }
-
-        .buy-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .buy-btn:hover {
-            background: var(--accent);
-            transform: scale(1.05);
-        }
-
-        /* Order Result */
-        .order-result {
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 30px;
-            margin-top: 40px;
-            display: none;
-            animation: fadeIn 0.5s ease;
-            border: 2px solid var(--primary);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .order-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .order-icon {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-
-        .order-title {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-
-        .order-status {
-            background: #FFF8DC;
-            padding: 20px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            border-left: 4px solid var(--secondary);
-        }
-
-        .status-text {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        .order-id {
-            font-size: 0.9rem;
-            color: var(--gray);
-            background: #F5E6D3;
-            padding: 8px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            font-family: monospace;
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .payment-link {
-            background: var(--success);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: var(--transition);
-        }
-
-        .payment-link:hover {
-            background: #1E6B47;
-            transform: translateY(-3px);
-        }
-
-        .status-btn {
-            background: var(--accent);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: var(--transition);
-        }
-
-        .status-btn:hover {
-            background: #B85C14;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 25px;
-            color: var(--dark);
-            font-size: 0.9rem;
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .store-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .title {
-                font-size: 2.2rem;
-            }
-            
-            .order-actions {
-                flex-direction: column;
-            }
-            
-            .payment-link, .status-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .categories {
-                gap: 8px;
-            }
-            
-            .category-btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Special offer banner */
-        .offer-banner {
-            background: linear-gradient(90deg, var(--accent), var(--primary));
-            color: white;
-            padding: 15px;
-            text-align: center;
-            border-radius: var(--radius);
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.9; }
-            50% { opacity: 1; }
-            100% { opacity: 0.9; }
-        }
-
-        .cart-summary {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: var(--transition);
-        }
-
-        .cart-summary:hover {
-            background: var(--accent);
-            transform: scale(1.05);
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <div class="container">
@@ -491,7 +37,7 @@
             <i class="fas fa-gift"></i> ¡OFERTA ESPECIAL! 15% de descuento en tu primera compra usando el código: DONONOFRE15
         </div>
 
-        <!-- Categories -->
+        <!-- Navigation -->
         <div class="categories">
             <button class="category-btn active" onclick="filterProducts('all')">
                 <i class="fas fa-store"></i> Todos los productos
@@ -507,6 +53,9 @@
             </button>
             <button class="category-btn" onclick="filterProducts('bakery')">
                 <i class="fas fa-bread-slice"></i> Panadería
+            </button>
+            <button class="category-btn" id="orders-history-btn" onclick="toggleOrdersHistory()">
+                <i class="fas fa-history"></i> Mis Pedidos
             </button>
         </div>
 
@@ -758,6 +307,52 @@
             </div>
         </section>
 
+        <!-- Order History Section -->
+        <section class="order-history" id="order-history" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i> Historial de Pedidos
+            </h2>
+            
+            <div class="order-filters" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="category-btn" onclick="filterOrders('all')">
+                    <i class="fas fa-list"></i> Todos
+                </button>
+                <button class="category-btn" onclick="filterOrders('PENDING')">
+                    <i class="fas fa-clock"></i> Pendientes
+                </button>
+                <button class="category-btn" onclick="filterOrders('PAID')">
+                    <i class="fas fa-check-circle"></i> Pagados
+                </button>
+                <button class="category-btn" onclick="filterOrders('FAILED')">
+                    <i class="fas fa-times-circle"></i> Fallidos
+                </button>
+            </div>
+            
+            <div class="orders-table-container" style="background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: var(--primary); color: white;">
+                        <tr>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-hashtag"></i> ID</th>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-box"></i> Producto</th>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-money-bill-wave"></i> Monto</th>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-info-circle"></i> Estado</th>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-calendar"></i> Fecha</th>
+                            <th style="padding: 15px; text-align: left;"><i class="fas fa-cog"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Los pedidos se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+                
+                <div id="orders-empty" style="padding: 40px; text-align: center; color: var(--gray); display: none;">
+                    <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <h3 style="color: var(--dark); margin-bottom: 10px;">No hay pedidos aún</h3>
+                    <p>Realiza tu primera compra para ver tu historial aquí.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Footer -->
         <footer class="footer">
             <h3 style="color: var(--primary); margin-bottom: 15px;">
@@ -800,6 +395,7 @@
         // Estado global
         let currentOrderId = null;
         let cartItems = [];
+        let ordersHistory = [];
         
         // Función para formatear precios al estilo paraguayo (punto como separador decimal)
         function formatPricePY(price) {
@@ -838,7 +434,7 @@
         // Función para filtrar productos
         function filterProducts(category) {
             const products = document.querySelectorAll('.product-card');
-            const buttons = document.querySelectorAll('.category-btn');
+            const buttons = document.querySelectorAll('.category-btn:not(#orders-history-btn)');
             
             // Actualizar botones activos
             buttons.forEach(btn => {
@@ -850,6 +446,17 @@
                     btn.classList.add('active');
                 }
             });
+            
+            // Ocultar sección de historial si está visible
+            const orderHistorySection = document.getElementById('order-history');
+            const ordersBtn = document.getElementById('orders-history-btn');
+            if (orderHistorySection.style.display === 'block') {
+                orderHistorySection.style.display = 'none';
+                ordersBtn.classList.remove('active');
+            }
+            
+            // Mostrar productos
+            document.querySelector('.products').style.display = 'block';
             
             // Mostrar/ocultar productos
             products.forEach(product => {
@@ -871,6 +478,227 @@
             });
         }
         
+        // Función para alternar entre productos e historial
+        function toggleOrdersHistory() {
+            const productsSection = document.querySelector('.products');
+            const orderHistorySection = document.getElementById('order-history');
+            const ordersBtn = document.getElementById('orders-history-btn');
+            const categoryBtns = document.querySelectorAll('.category-btn:not(#orders-history-btn)');
+            
+            if (orderHistorySection.style.display === 'none' || !orderHistorySection.style.display) {
+                // Mostrar historial
+                productsSection.style.display = 'none';
+                orderHistorySection.style.display = 'block';
+                ordersBtn.classList.add('active');
+                categoryBtns.forEach(btn => btn.classList.remove('active'));
+                
+                // Cargar pedidos
+                loadOrdersHistory();
+            } else {
+                // Mostrar productos
+                productsSection.style.display = 'block';
+                orderHistorySection.style.display = 'none';
+                ordersBtn.classList.remove('active');
+                filterProducts('all');
+            }
+        }
+        
+        // Función para cargar el historial de pedidos
+        function loadOrdersHistory() {
+            const ordersTableBody = document.getElementById('orders-table-body');
+            const ordersEmpty = document.getElementById('orders-empty');
+            
+            // Cargar historial desde localStorage
+            loadOrdersFromLocalStorage();
+            
+            // Limpiar tabla
+            ordersTableBody.innerHTML = '';
+            
+            if (ordersHistory.length === 0) {
+                ordersEmpty.style.display = 'block';
+                return;
+            }
+            
+            ordersEmpty.style.display = 'none';
+            
+            // Ordenar por fecha (más reciente primero)
+            const sortedOrders = [...ordersHistory].sort((a, b) => 
+                new Date(b.created_at) - new Date(a.created_at)
+            );
+            
+            // Agregar filas a la tabla
+            sortedOrders.forEach(order => {
+                const row = document.createElement('tr');
+                row.className = 'order-row';
+                row.dataset.status = order.status;
+                
+                // Formatear fecha
+                const fecha = new Date(order.created_at);
+                const fechaFormateada = fecha.toLocaleDateString('es-PY', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Determinar clase de estado
+                let statusClass = 'status-pending';
+                let statusText = 'Pendiente';
+                
+                if (order.status === 'PAID') {
+                    statusClass = 'status-paid';
+                    statusText = 'Pagado';
+                } else if (order.status === 'FAILED') {
+                    statusClass = 'status-failed';
+                    statusText = 'Fallido';
+                }
+                
+                // Formatear precio
+                const precioFormateado = formatPricePY(order.amount);
+                
+                // Crear botones de acción
+                let actionButtons = '';
+                
+                if (order.status === 'PENDING') {
+                    actionButtons = `
+                        <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        ${order.payment_link ? `
+                        <button class="action-btn pay-btn" onclick="window.open('${order.payment_link}', '_blank')">
+                            <i class="fas fa-external-link-alt"></i> Pagar
+                        </button>
+                        ` : ''}
+                    `;
+                } else if (order.status === 'FAILED') {
+                    actionButtons = `
+                        <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="action-btn retry-btn" onclick="retryOrder('${order.id}')">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button class="action-btn view-btn" onclick="viewOrderDetail('${order.id}')">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                    `;
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <span style="font-family: monospace; font-size: 0.85rem; color: var(--dark);">
+                            ${order.id.substring(0, 8)}...
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="color: var(--primary);">${order.product_name}</strong>
+                    </td>
+                    <td>
+                        <span style="font-weight: 600; color: var(--dark);">₲ ${precioFormateado}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-size: 0.9rem; color: var(--gray);">${fechaFormateada}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${actionButtons}
+                        </div>
+                    </td>
+                `;
+                
+                ordersTableBody.appendChild(row);
+            });
+        }
+        
+        // Función para filtrar pedidos por estado
+        function filterOrders(status) {
+            const rows = document.querySelectorAll('.order-row');
+            const filterBtns = document.querySelectorAll('.order-filters .category-btn');
+            
+            // Actualizar botones activos
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            rows.forEach(row => {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Función para ver detalles de un pedido
+        function viewOrderDetail(orderId) {
+            const order = ordersHistory.find(o => o.id === orderId);
+            if (!order) return;
+            
+            // Formatear fecha
+            const fecha = new Date(order.created_at);
+            const fechaFormateada = fecha.toLocaleDateString('es-PY', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Formatear precio
+            const precioFormateado = formatPricePY(order.amount);
+            
+            // Determinar estado
+            let estadoTexto = 'Pendiente';
+            if (order.status === 'PAID') estadoTexto = 'Pagado';
+            if (order.status === 'FAILED') estadoTexto = 'Fallido';
+            
+            // Mostrar detalles en el modal/alerta
+            const detalles = `
+            **Mercado Don Onofre**\n\n
+            **DETALLES DEL PEDIDO**\n
+            ──────────────────────\n
+            **ID:** ${order.id}\n
+            **Producto:** ${order.product_name}\n
+            **Monto:** ₲ ${precioFormateado}\n
+            **Estado:** ${estadoTexto}\n
+            **Fecha:** ${fechaFormateada}\n
+            **Enlace de pago:** ${order.payment_link || 'No disponible'}\n\n
+            ──────────────────────\n
+            **Acciones disponibles:**\n
+            • Verificar estado actual\n
+            ${order.status === 'PENDING' && order.payment_link ? '• Completar el pago\n' : ''}
+            ${order.status === 'FAILED' ? '• Reintentar compra\n' : ''}
+            \n📞 **Soporte:** (021) 123-456
+            `;
+            
+            alert(detalles);
+        }
+        
+        // Función para reintentar un pedido fallido
+        function retryOrder(orderId) {
+            const order = ordersHistory.find(o => o.id === orderId);
+            if (!order) return;
+            
+            if (confirm(`¿Deseas reintentar la compra de "${order.product_name}" por ₲ ${formatPricePY(order.amount)}?`)) {
+                // Volver a la sección de productos
+                toggleOrdersHistory();
+                // Simular clic en el producto correspondiente (esto es simplificado)
+                // En una implementación real, deberías buscar y hacer scroll al producto
+                setTimeout(() => {
+                    comprarProducto(order.product_name, order.amount);
+                }, 500);
+            }
+        }
+        
         function comprarProducto(nombreProducto, monto) {
             const orderResult = document.getElementById('order-result');
             const statusText = document.getElementById('status-text');
@@ -888,6 +716,20 @@
                 timestamp: new Date().toISOString()
             });
             updateCartSummary();
+            
+            // Crear pedido temporal para historial
+            const tempOrderId = `temp_${Date.now()}`;
+            const tempOrder = {
+                id: tempOrderId,
+                product_name: nombreProducto,
+                amount: monto,
+                status: 'PENDING',
+                payment_link: null,
+                created_at: new Date().toISOString()
+            };
+            
+            ordersHistory.push(tempOrder);
+            saveOrdersToLocalStorage();
             
             // Mostrar sección de resultado
             orderResult.style.display = 'block';
@@ -937,6 +779,20 @@
             .then(datos => {
                 console.log('Respuesta del servidor:', datos);
                 currentOrderId = datos.id;
+                
+                // Actualizar el pedido temporal con datos reales
+                const tempIndex = ordersHistory.findIndex(o => o.id === tempOrderId);
+                if (tempIndex !== -1) {
+                    ordersHistory[tempIndex] = {
+                        id: datos.id,
+                        product_name: nombreProducto,
+                        amount: monto,
+                        status: 'PENDING',
+                        payment_link: datos.payment_link || null,
+                        created_at: new Date().toISOString()
+                    };
+                    saveOrdersToLocalStorage();
+                }
                 
                 // Actualizar estado
                 if (datos.error) {
@@ -1036,6 +892,13 @@
                     </span>
                 `;
                 
+                // Actualizar estado del pedido temporal a fallido
+                const tempIndex = ordersHistory.findIndex(o => o.id === tempOrderId);
+                if (tempIndex !== -1) {
+                    ordersHistory[tempIndex].status = 'FAILED';
+                    saveOrdersToLocalStorage();
+                }
+                
                 // Mostrar botón para reintentar
                 const retryBtn = document.createElement('button');
                 retryBtn.className = 'status-btn';
@@ -1101,18 +964,25 @@
                         </span>
                     `;
                     
+                    // Actualizar historial local
+                    const orderIndex = ordersHistory.findIndex(o => o.id === idPedido);
+                    if (orderIndex !== -1) {
+                        ordersHistory[orderIndex].status = datos.status.toUpperCase();
+                        saveOrdersToLocalStorage();
+                    }
+                    
                     // Mostrar alerta detallada
                     setTimeout(() => {
                         // Formatear el precio para la alerta
                         const productPrice = datos.amount ? `₲ ${formatPricePY(datos.amount)}` : 'N/A';
-                        alert(`🏪 **Mercado Don Onofre**\n\n` +
-                            `📦 **Pedido #${idPedido}**\n` +
-                            `🍽️ **Producto:** ${datos.product_name || 'N/A'}\n` +
-                            `💰 **Total:** ${productPrice}\n` +
-                            `📊 **Estado:** ${statusMessage}\n` +
-                            `📅 **Fecha:** ${new Date(datos.created_at).toLocaleString('es-PY')}\n\n` +
-                            `💡 **Información:** ${additionalInfo}\n\n` +
-                            `📞 **Contacto:** (021) 123-456`);
+                        alert(`**Mercado Don Onofre**\n\n` +
+                            `**Pedido #${idPedido}**\n` +
+                            `**Producto:** ${datos.product_name || 'N/A'}\n` +
+                            `**Total:** ${productPrice}\n` +
+                            `**Estado:** ${statusMessage}\n` +
+                            `**Fecha:** ${new Date(datos.created_at).toLocaleString('es-PY')}\n\n` +
+                            `**Información:** ${additionalInfo}\n\n` +
+                            `**Contacto:** (021) 123-456`);
                     }, 300);
                 })
                 .catch(error => {
@@ -1136,12 +1006,28 @@
                 const totalFormatted = formatPricePY(total);
                 
                 // Mostrar tooltip con resumen
-                cartSummary.title = `Productos en carrito:\n${cartItems.map(item => `• ${item.name} - ₲ ${formatPricePY(item.price)}`).join('\n')}\n\n💰 Total: ₲ ${totalFormatted}`;
+                cartSummary.title = `Productos en carrito:\n${cartItems.map(item => `• ${item.name} - ₲ ${formatPricePY(item.price)}`).join('\n')}\n\n Total: ₲ ${totalFormatted}`;
+            }
+        }
+        
+        // Guardar historial en localStorage
+        function saveOrdersToLocalStorage() {
+            localStorage.setItem('donOnofreOrders', JSON.stringify(ordersHistory));
+        }
+        
+        // Cargar historial desde localStorage
+        function loadOrdersFromLocalStorage() {
+            const savedOrders = localStorage.getItem('donOnofreOrders');
+            if (savedOrders) {
+                ordersHistory = JSON.parse(savedOrders);
             }
         }
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
+            // Cargar historial desde localStorage
+            loadOrdersFromLocalStorage();
+            
             // Efecto de aparición suave para las tarjetas
             const cards = document.querySelectorAll('.product-card');
             cards.forEach((card, index) => {
@@ -1201,7 +1087,7 @@
                     
                     alert(`🛒 **Tu Carrito de Compras**\n\n` +
                         `${cartItems.map((item, index) => `${index + 1}. ${item.name} - ₲ ${formatPricePY(item.price)}`).join('\n')}\n\n` +
-                        `💰 **Total:** ₲ ${totalFormatted}\n\n` +
+                        `**Total:** ₲ ${totalFormatted}\n\n` +
                         `*Los productos se procesan individualmente para mejor control de inventario.`);
                 }
             });
