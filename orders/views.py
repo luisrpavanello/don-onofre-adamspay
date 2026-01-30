@@ -51,6 +51,7 @@ def create_order(request):
         )
         
         print(f"Pedido creado: {order.id}")
+        print(f"Valor original: {amount} (este es el valor en guaranis)")
         
         # Si no hay API Key, usar modo simulación
         if not ADAMSPAY_API_KEY or ADAMSPAY_API_KEY == 'su_api_key_aqui':
@@ -69,9 +70,7 @@ def create_order(request):
                 'warning': 'Configure ADAMSPAY_API_KEY en Render para integración real'
             })
         
-        # Integración real con AdamsPay
-        valor_pyg = int(float(amount) * 1000)
-        
+        valor_pyg = int(float(amount))
         inicio = datetime.now()
         fin = inicio + timedelta(days=2)
         
@@ -101,6 +100,7 @@ def create_order(request):
         }
         
         print(f"Llamando a AdamsPay: {ADAMSPAY_API_URL}")
+        print(f"Payload: {json.dumps(payload, indent=2)}")
         
         response = requests.post(
             ADAMSPAY_API_URL,
@@ -113,6 +113,7 @@ def create_order(request):
         
         if response.status_code in [200, 201]:
             data = response.json()
+            print(f"Respuesta AdamsPay: {json.dumps(data, indent=2)}")
             
             if 'debt' in data and 'payUrl' in data['debt']:
                 payment_url = data['debt']['payUrl']
