@@ -14,10 +14,6 @@ import json
 import uuid
 from datetime import datetime, timedelta
 
-# Página principal
-def home(request):
-    return render(request, 'index.html')
-
 # Configuraciones de AdamsPay
 ADAMSPAY_BASE_URL = os.getenv('ADAMSPAY_BASE_URL', 'https://staging.adamspay.com')
 ADAMSPAY_API_URL = f"{ADAMSPAY_BASE_URL}/api/v1/debts"
@@ -26,9 +22,47 @@ ADAMSPAY_APP_SECRET = os.getenv('ADAMSPAY_APP_SECRET', '')
 ADAMSPAY_APP_SLUG = os.getenv('ADAMSPAY_APP_SLUG', 'website')
 ADAMSPAY_CALLBACK_URL = os.getenv('ADAMSPAY_CALLBACK_URL', 'https://don-onofre-adamspay.onrender.com/api/adams/callback/')
 
-# Crear pedido
+
+def home(request):
+    """
+    Vista para la página principal.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP.
+    
+    Returns:
+        HttpResponse: Renderiza la plantilla index.html.
+    """
+    return render(request, 'index.html')
+
+
 @api_view(['POST'])
 def create_order(request):
+    """
+    Crea un nuevo pedido y lo registra en AdamsPay.
+    
+    Esta vista maneja la creación de un pedido en el sistema local
+    y su posterior registro en la pasarela de pagos AdamsPay.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con datos JSON.
+            Debe contener:
+            - product_name (str): Nombre del producto.
+            - amount (float): Monto total en guaraníes.
+    
+    Returns:
+        Response: JSON con los datos del pedido creado.
+            - id (str): ID único del pedido.
+            - product_name (str): Nombre del producto.
+            - amount (str): Monto formateado.
+            - status (str): Estado inicial (PENDING).
+            - payment_link (str): URL para proceder al pago.
+            - warning (str, opcional): Advertencias si hay problemas con AdamsPay.
+    
+    Raises:
+        400 Bad Request: Si faltan parámetros obligatorios.
+        500 Internal Server Error: Si ocurre un error inesperado.
+    """
     try:
         print("Iniciando creación de pedido")
         print(f"Datos recibidos: {request.data}")
@@ -154,10 +188,28 @@ def create_order(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-# Consultar estado del pedido
+
 @api_view(['GET'])
 def order_status(request, order_id):
-    """Consultar estado del pedido"""
+    """
+    Consulta el estado actual de un pedido existente.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP.
+        order_id (UUID): ID único del pedido a consultar.
+    
+    Returns:
+        Response: JSON con los datos actualizados del pedido.
+            - id (str): ID del pedido.
+            - product_name (str): Nombre del producto.
+            - amount (str): Monto total.
+            - status (str): Estado actual (PENDING/PAID/FAILED).
+            - payment_link (str): URL de pago (si existe).
+            - created_at (datetime): Fecha de creación.
+    
+    Raises:
+        404 Not Found: Si el pedido no existe.
+    """
     try:
         order = Order.objects.get(id=order_id)
         return Response({
@@ -171,10 +223,29 @@ def order_status(request, order_id):
     except Order.DoesNotExist:
         return Response({'error': 'Pedido no encontrado'}, status=404)
 
-# Webhook para recibir notificaciones de AdamsPay
+
 @api_view(['POST'])
 def adams_callback(request):
-    """Webhook para notificaciones de AdamsPay (POST)"""
+    """
+    Webhook para recibir notificaciones de AdamsPay (POST).
+    
+    Este endpoint recibe notificaciones asincrónicas de AdamsPay
+    cuando cambia el estado de un pago.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con datos JSON
+            de notificación de AdamsPay.
+    
+    Returns:
+        Response: Resultado del procesamiento de la notificación.
+            - ok (bool): True si se procesó correctamente.
+            - order_id (str): ID del pedido actualizado.
+            - status (str): Nuevo estado del pedido.
+            - message (str): Mensaje descriptivo.
+    
+    Raises:
+        500 Internal Server Error: Si ocurre un error al procesar.
+    """
     try:
         print("Webhook AdamsPay recibido")
         print(f"Datos: {request.data}")
@@ -190,11 +261,30 @@ def adams_callback(request):
         print(traceback.format_exc())
         return Response({'error': str(e)}, status=500)
 
-# URL de retorno después del pago
+
 @api_view(['GET'])
 @csrf_exempt
 def adams_redirect(request):
-    """URL de retorno después del pago (GET)"""
+    """
+    URL de retorno después del pago en AdamsPay (GET).
+    
+    Esta vista maneja la redirección del usuario después de completar
+    el pago en AdamsPay. Procesa los parámetros de la URL y actualiza
+    el estado del pedido.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con parámetros GET.
+            Parámetros esperados:
+            - order_id o externalId: ID del pedido.
+            - status: Estado del pago (completed, failed, pending).
+    
+    Returns:
+        HttpResponse: Renderiza la plantilla payment_result.html con
+            los datos del pedido actualizado.
+    
+    Raises:
+        400 Bad Request: Si no se proporciona el ID del pedido.
+    """
     try:
         print("Redirect AdamsPay recibido")
         print(f"Parámetros: {dict(request.GET)}")
@@ -241,9 +331,34 @@ def adams_redirect(request):
             'error': str(e)
         })
 
-# Procesador común de notificaciones
+
 def procesar_notificacion_adams(datos):
-    """Procesa notificaciones de AdamsPay"""
+    """
+    Procesa notificaciones de AdamsPay y actualiza el estado del pedido.
+    
+    Función auxiliar que extrae y procesa los datos de notificación
+    de AdamsPay para actualizar el estado del pedido correspondiente.
+    
+    Args:
+        datos (dict|str): Datos de notificación en formato JSON o dict.
+            Puede contener:
+            - externalId, debt.docId, id, order_id: ID del pedido.
+            - status: Estado del pago.
+            - debt.payStatus.status: Estado del pago en estructura anidada.
+    
+    Returns:
+        Response: JSON con resultado del procesamiento.
+            - ok (bool): True si se procesó correctamente.
+            - order_id (str): ID del pedido procesado.
+            - status (str): Nuevo estado del pedido.
+            - previous_status (str): Estado anterior (siempre PENDING).
+            - message (str): Mensaje descriptivo.
+    
+    Raises:
+        400 Bad Request: Si no se puede extraer el ID del pedido.
+        404 Not Found: Si el pedido no existe en la base de datos.
+        500 Internal Server Error: Si ocurre un error inesperado.
+    """
     try:
         print("Procesando notificación AdamsPay")
         print(f"Datos recibidos: {datos}")
@@ -350,9 +465,21 @@ def procesar_notificacion_adams(datos):
         print(f"Traceback: {traceback.format_exc()}")
         return Response({'error': str(e)}, status=500)
 
-# Página de resultado de pago
+
 def payment_result(request):
-    """Página para mostrar resultado del pago"""
+    """
+    Página para mostrar el resultado del proceso de pago.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP.
+            Parámetro GET opcional:
+            - order_id: ID del pedido a mostrar.
+    
+    Returns:
+        HttpResponse: Renderiza payment_result.html con:
+            - order (Order): Objeto del pedido (si existe).
+            - error (str): Mensaje de error (si el pedido no existe).
+    """
     order_id = request.GET.get('order_id')
     if order_id:
         try:
@@ -362,10 +489,31 @@ def payment_result(request):
             pass
     return render(request, 'payment_result.html', {'error': 'No se encontró el pedido'})
 
-# Endpoint de prueba para webhook
+
 @api_view(['GET'])
 def test_webhook(request, order_id):
-    """Probar webhook manualmente (para desarrollo)"""
+    """
+    Endpoint de prueba para simular webhooks de AdamsPay.
+    
+    Útil para desarrollo y testing para simular notificaciones
+    de AdamsPay sin necesidad de realizar pagos reales.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP.
+        order_id (UUID): ID del pedido a testear.
+    
+    Returns:
+        Response: JSON con resultado de la simulación.
+            - test (str): Identificador de la prueba.
+            - order_id (str): ID del pedido.
+            - estado_anterior (str): Estado antes de la simulación.
+            - estado_nuevo (str): Estado después de la simulación.
+            - respuesta_webhook (dict): Respuesta del procesador.
+            - payment_link (str): URL de pago asociada.
+    
+    Raises:
+        404 Not Found: Si el pedido no existe.
+    """
     try:
         order = Order.objects.get(id=order_id)
         
